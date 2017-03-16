@@ -1,0 +1,87 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Report for Comp Exam}
+\author{Siyuan Zhao}
+\date{March 2017}
+
+\usepackage{amsmath, mathtools}
+
+\begin{document}
+
+\maketitle
+
+\section{Bayesian Optimization}
+Bayesian optimization is a sequential design strategy for global
+optimization of black-box functions that does not require
+derivatives. Since the objective function is unknown, the Bayesian
+strategy is to treat it as a random function and place a prior over it. The prior captures our beliefs about the behaviour of the
+function. After gathering the function evaluations, which are treated
+as data, the prior is updated to form the posterior distribution
+over the objective function. The posterior distribution, in turn, is
+used to construct an acquisition function that determines what the
+next query point should be. Examples of acquisition functions includes
+probability of improvement, expected improvement, Bayesian expected
+losses, upper confidence bounds (UCB), Thompson sampling and mixtures
+of these. They all trade-off exploration and exploitation so as to
+minimize the number of function queries. As such, Bayesian
+optimization is well suited for functions that are very expensive to evaluate.
+
+
+\section{Gaussian Processes}
+Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
+
+Gaussian processes is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
+
+\subsection{Probability distributions over functions with finite domains}
+Let $\mathcal{X} = \left \{ x_1, x_2, …, x_m \right \}$ be any finite set of elements. Consider the set $\mathcal{H}$ of all possible functions mapping from $\mathcal{X}$ to $\mathbf{R}$. For instance, one example of a function $f_0(\cdot) \in \mathcal{H}$ is given by
+
+$$f_0(x_1)=5,~f_0(x_2)=2.3, \dotsb ,~f_0(x_{m-1})=-\pi,~f_0(x_m)=8.$$
+
+Since the domain of any $f(\cdot) \in \mathcal{H}$ has only $m$ elements, we can always represent $f(\cdot)$ compactly as an $m$-dimensional vector, $\vec{f}=[f(x_1)~~f(x_2)~~...~~f(x_m) ]^T$. In order to specify a probability distribution over functions $f(\cdot) \in \mathcal{H}$, we must associate some "probability density" with each function in $\mathcal{H}$. One natural way to do this is to exploit the one-to-one correspondence between $f(\cdot) \in \mathcal{H}$ and their vector representation, $\vec{f}$. In particular, if we specify that $\vec{f}\sim \mathcal{N}(\vec{\mu},\sigma ^2I)$, then this in turn implies a probability distribution over functions $f(\cdot)$, whose probability density function is given by
+$$p(h) = \prod_{i=1}^{m} \frac{1}{\sqrt{2\pi}\sigma}\mathrm{exp}(-\frac{1}{2\sigma ^2} (f(x_i)-\mu _i)^2)
+$$
+
+In the example above, we show that probability distributions over functions with finite domains can be represented using a finite-dimensional multivariate Gaussian distribution over function outputs $f(x_1),...,f(x_m)$ at a finite number of input points $x1, ..., x_m$
+
+\subsection{Probability distributions over functions with infinite domains}
+A stochastic process is a collection of random variables, $\left \{ f(x): x \in \mathcal{X} \right \}$, indexed by elements from some set $\mathcal{X}$, known as the index set. A Gaussian process is a stochastic process such that any finite sub-collection of random variables has a multivariate Gaussian distribution.
+
+In particular, a collection of random variables $\left \{ f(x): x \in \mathcal{X} \right \}$ is said to be drawn from a Gaussian process with mean function $m(\cdot)$ and covariance function $k(\cdot , \cdot)$ if for any finite set of elements $x_1,...,x_m \in \mathcal{X}$, the associated finite set of random variables $f(x_1),...,f(x_m)$ have distribution,
+$$\begin{bmatrix}
+f(x_1)\\
+\vdots \\
+f(x_m) 
+\end{bmatrix} \sim \mathcal{N} \left( 
+\begin{bmatrix}
+m(x_1)\\
+\vdots \\
+m(x_m) 
+\end{bmatrix}, \begin{bmatrix}
+k(x_1, x_1) & \cdots & k(x_1, x_m) \\
+\vdots & \ddots & \vdots\\
+k(x_m, x_1) & \cdots & k(x_m, x_m) \\
+\end{bmatrix} 
+\right).$$
+
+We denote this using the notation,
+
+$$f(\cdot) \sim \mathcal{GP}(m(\cdot), k(\cdot, \cdot)).$$
+
+In general, any real-valued function $m(\cdot)$ is acceptable, but for $k(\cdot, \cdot)$, it must be the case that for any set of elements $x_1, \dotsc, x_m \in \mathcal{X}$, the resulting matrix
+$$K = \begin{bmatrix}
+k(x_1, x_1) & \cdots & k(x_1, x_m) \\
+\vdots & \ddots & \vdots\\
+k(x_m, x_1) & \cdots & k(x_m, x_m) \\
+\end{bmatrix} $$
+is a valid covariance matrix corresponding to some multivariate
+Gaussian distribution. A standard result in probability theory states
+that this is true provided that $K$ is positive semi-definite.
+
+\section{Reproducing kernel Hilbert space}
+In functional analysis, a reproducing kernel Hilbert space (RKHS) is a
+Hilbert space of functions in which point evaluation is a continuous
+linear functional. The representer theorem states that every function
+in an RKHS that minimizes an empirical risk function can be written as
+a linear combination of the kernel function evaluated at the training points.
+\end{document}
