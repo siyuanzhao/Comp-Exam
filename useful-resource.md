@@ -24,3 +24,6 @@
 
 > Slides from Michael Kosorok. It covers several methods for individual treatment rules (ITR) and gives a good introduction to the problem setup of ITR.
 
+[Gaussian processes](http://cs229.stanford.edu/section/cs229-gaussian_processes.pdf)
+> Good intro to Gaussian processes and concrete example of Gaussian processes regression, but it does not talk about Bayesian optimization.
+
