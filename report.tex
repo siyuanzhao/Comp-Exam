@@ -27,7 +27,9 @@ of these. They all trade-off exploration and exploitation so as to
 minimize the number of function queries. As such, Bayesian
 optimization is well suited for functions that are very expensive to evaluate.
 
+In summary, Bayesian optimization is the combination of two main components: a surrogate model which captures all prior and observed information and a decision process which performs the optimal action, i.e.: where to sample next, based on the previous model.
 
+However, the Gaussian process (GP) is the most popular model due to its accuracy, robustness and flexibility, because Bayesian optimization is mainly usesd in blck-box scenarios. The range of applicaility of a Gaussian process is defined by its kernel function, which sets the family of functions that is able to represent through the reproducing kernel Hilbert space (RKHS).
 \section{Gaussian Processes}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 

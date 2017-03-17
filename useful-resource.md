@@ -27,3 +27,5 @@
 [Gaussian processes](http://cs229.stanford.edu/section/cs229-gaussian_processes.pdf)
 > Good intro to Gaussian processes and concrete example of Gaussian processes regression, but it does not talk about Bayesian optimization.
 
+[Course in Bayesian Optimization](http://javiergonzalezh.github.io/archive4_teaching.html)
+> Slides, code and videos from a summer course on BO.
