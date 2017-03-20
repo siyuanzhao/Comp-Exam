@@ -1,4 +1,5 @@
 \documentclass{article}
+\usepackage{cite}
 \usepackage[utf8]{inputenc}
 
 \title{Report for Comp Exam}
@@ -6,15 +7,48 @@
 \date{March 2017}
 
 \usepackage{amsmath, mathtools}
-
+\usepackage{amsfonts}
 \begin{document}
 
 \maketitle
 
+\section{Random Causal Forest}
+\cite{wager2015estimation} proposed random causal forest (RCF) to
+infer treatment effect. From the conceptual point of view, trees and forests can be viewed as
+nearest neighbor methods with an adaptive neighborhood metric. Given
+observed independent samples $(X_i, Y_i, W_i)$, a causal tree is first
+built by recursively splitting the feature space until all samples are
+partitioned into a set of leaves $L$, each of which contains a few
+training samples. Then, for a data point $x$, the predicted outcome $\hat{\mu}(x)$
+is evaluated by identifying the leaf $L(x)$ containing $x$ and
+calculating
+
+$$\hat{\mu} = \frac{1}{\left | \left \{ i: X_i \in L(x) \right \}
+  \right |} \sum_{\left \{ i: X_i \in L(x) \right \}} Y_i$$
+
+Given a test point $x$, the closest points to $x$ are those fall in the same
+leaf as it. The authors believe that the leaf is small enough that the
+responses $Y_i$ are roughly identically distributed. Then the
+treatment effect $\hat{\tau}$ for any $x \in L(x)$ is estimated as
+following:
+
+\begin{align*}
+\hat{\tau}(x) & = \frac{1}{\left | \left \{ i: W_i=1, X_i \in L(x) \right \}
+  \right |} \sum_{\left \{ i: W_i = 1, X_i \in L(x) \right \}} Y_i \\ & - \frac{1}{\left | \left \{ i: W_i=0, X_i \in L(x) \right \}
+  \right |} \sum_{\left \{ i: W_i = 0, X_i \in L(x) \right \}} Y_i
+\end{align*}
+RCF assumes that
+there is overlapping in the data, i.e., for some $\epsilon > 0$ and
+all $x \in \left [ 0, 1\right ]^d$,
+
+$$\epsilon < \mathbb{P}\left [ W=1 \mid X=x \right ] < 1-\epsilon$$
+
+This condition effectively guarantees that, for large enough $n$,
+there will be enough treatment and control units near any test point
+$x$ for local methods to work.
+
 \section{Bayesian Optimization}
-Bayesian optimization is a sequential design strategy for global
-optimization of black-box functions that does not require
-derivatives. Since the objective function is unknown, the Bayesian
+Bayesian optimization is a sequential design strategy for global optimization of black-box functions that does not require derivatives. Since the objective function is unknown, the Bayesian
 strategy is to treat it as a random function and place a prior over it. The prior captures our beliefs about the behaviour of the
 function. After gathering the function evaluations, which are treated
 as data, the prior is updated to form the posterior distribution
@@ -29,7 +63,52 @@ optimization is well suited for functions that are very expensive to evaluate.
 
 In summary, Bayesian optimization is the combination of two main components: a surrogate model which captures all prior and observed information and a decision process which performs the optimal action, i.e.: where to sample next, based on the previous model.
 
-However, the Gaussian process (GP) is the most popular model due to its accuracy, robustness and flexibility, because Bayesian optimization is mainly usesd in blck-box scenarios. The range of applicaility of a Gaussian process is defined by its kernel function, which sets the family of functions that is able to represent through the reproducing kernel Hilbert space (RKHS).
+However, the Gaussian process (GP) is the most popular model due to
+its accuracy, robustness and flexibility, because Bayesian
+optimization is mainly usesd in blck-box scenarios. The range of
+applicaility of a Gaussian process is defined by its kernel function,
+which sets the family of functions that is able to represent through
+the reproducing kernel Hilbert space (RKHS). In BO, attributes of the
+GP such as mean and variance are used to sample successive points. It
+is suitable for situations where cost function is costly to evaluate
+and MCMC techniques would not work.
+
+\section{Propensity Score Matching}
+A propensity score is the probability of a unit (e.g., student,
+classroom, school) being assigned to a particular treatment given a
+set of observed covariates. Propensity scores are used to reduce
+selection bias by equating groups based on these covariates.
+
+Propensity score matching (PSM) entails forming matched sets of treated and
+untreated subjects who share a similar value of the propensity
+score. PSM allows one to estimate the average treatment effect for the
+treated (ATT). The ATT is the average effect of treatment on those
+subjects who ultimately receive the treatment. The most common
+implementation of PSM is one-to-one or pair matching, in which pairs
+of treated and untreated subjects are formed, such that matched
+subjects have similar values of the propensity score. Once a matched
+sample has been formed, the treatment effect can be estimated by
+directly comparing outcomes between treated and untreated subjects in
+the matched sample. If the outcome is continuous, the effect of
+treatment can be estimated as the difference between the mean outcome
+for treated subjects and the mean outcome for untreated subjects in
+the matched sample. If the outcome is binary, the effect of treatment
+can be estimated as the difference between the proportion of subjects
+experiencing the event in each of the two groups (treated
+vs. untreated) in the matched sample.
+
+Suppose that we have a binary treatment $T={0,1}$, an outcome $Y$, and
+background variables $X$. The propensity score is defined as the
+conditional probability of treatment given background variables:
+
+$$p(x):= \Pr(T=1 \mid X=x)$$
+
+Let $Y(0)$ and $Y(1)$ denote the potential outcomes under the control
+and the treatment, respectively.
+
+The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
+
+
 \section{Gaussian Processes}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 
@@ -85,5 +164,14 @@ In functional analysis, a reproducing kernel Hilbert space (RKHS) is a
 Hilbert space of functions in which point evaluation is a continuous
 linear functional. The representer theorem states that every function
 in an RKHS that minimizes an empirical risk function can be written as
-a linear combination of the kernel function evaluated at the training points.
+a linear combination of the kernel function evaluated at the training
+points.
+
+\bibliographystyle{plain}
+\bibliography{references}
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
