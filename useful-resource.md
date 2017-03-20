@@ -29,3 +29,6 @@
 
 [Course in Bayesian Optimization](http://javiergonzalezh.github.io/archive4_teaching.html)
 > Slides, code and videos from a summer course on BO.
+
+[AN INTRODUCTION TO MCMC SAMPLING METHODS](http://www.statistics.com/papers/LESSON1_Notes_MCMC.pdf)
+
