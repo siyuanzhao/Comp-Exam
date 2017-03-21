@@ -1,7 +1,8 @@
 \documentclass{article}
 \usepackage{cite}
 \usepackage[utf8]{inputenc}
-
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \title{Report for Comp Exam}
 \author{Siyuan Zhao}
 \date{March 2017}
@@ -12,6 +13,70 @@
 
 \maketitle
 
+\section{Problem Setup}
+Let $\mathcal{T}$ be the set of proposed interventions we wish to
+consider, $X$ the set of participants, and $Y$ the set of possible
+outcomes. For each proposed intervention $t \in \mathcal{T}$, let
+$Y(t) \in Y$ be the potential outcome for $x$ when x is assigned to
+the intervention $t$. In randomized control trial (RCT) and observed
+study, only one outcome is observed for a given participant $x$; even
+if the participant is given an intervention and later the other, the
+participant is not in the same state.
+
+In the binary intervention set, there are two possible interventions
+$\mathcal{T} = \left \{  0, 1 \right \}$, where intervention 1 is
+often referred as the "treated" and intervention 0 is the "control."
+Given a sample of subjects and a treatment, each subject has a pair of
+potential outcomes: $Y_i(0)$ and $Y_i(1)$, the outcomes under the
+control and the treatment, respectively. Let $t$ be an indicator
+variable denoting the treatment received ($t = 0$ for the control and
+$t=1$ for the treatment). Only one outcome, $Y_i (Y_i=t\cdot Y_i(1) +
+(1-t) \cdot Y_i(0))$, is observed for the
+subject $i$.
+
+The individual treatment effect (ITE) can be defined to
+be $Y_i(1) - Y_i(0)$. The average treatment effect (ATE) is defined to
+be $E[Y_i(1) - Y_i(0)]$. The ATE is the average treatment effect, at
+the population level, of moving an entire population from the control
+to the treatment. A related measure of treatment effect is the average
+treatment effect for the treated (ATT) \cite{imbens2004}. The ATT is
+defined as $E[Y(1)-Y(0) \mid t=1]$. The ATT is the average effect of
+treatment on those subjects who ultimately received the treatment. In
+an RCT these tow measures of treatment effects coincide because, due
+to randomization, the treated population will not, on average, differ
+systematically from overall population.
+
+\subsection{Randomized Controlled Trials}
+In RCTs, treatment is assigned by randomization. As a consequence of
+randomization, an unbiased estimate of the ATE can be directly
+computed from the data. An unbiased estimate of the ATE is
+$E[Y_i(1)-Y_i(0)]=E[Y(1)] - E[Y(0)]$. This definition allows one to
+define the ATE in terms of a difference in means (continuous outcomes)
+or a difference in proportions (binary outcomes).
+
+\subsection{Observational Studies}
+An observational study has the same intent as a randomized experiment:
+to estimate a causal effect. However, an observational study differs
+from a RCT in one design issue: the use of randomization to allocate
+units to treatment and control groups.
+
+In observational studies, the treated subjects often differ
+systematically from untreated subjects. In general, $E[Y(1)\mid t=1]
+\neq E[Y(1)]$ holds. Thus, an unbiased estimate of the average
+treatment effect cannot be obtained by directly comparing outcomes
+between the two treatment groups.
+
+\subsection{Strong Ignorability}
+The treatment assignment is defined to be strongly ignorable
+\cite{rosenbaum1983central} if the following two conditions hold: 1).
+$(Y(1), Y(0)) \independent t\mid X$ and 2). $0 < \Pr (t=1 \mid X) <
+1$. The first condition says that treatment assignment is independent
+of the potential outcomes conditional on the observed baseline
+covariates. The second condition says that every subject has a nonzero
+probability to receive either treatment. The aforementioned first
+condition is also referred to as the "no unmeasured confounders"
+assumption that all variables that affect treatment assignment and
+outcome have been measured.
 \section{Random Causal Forest}
 \cite{wager2015estimation} proposed random causal forest (RCF) to
 infer treatment effect. From the conceptual point of view, trees and forests can be viewed as
@@ -47,6 +112,61 @@ This condition effectively guarantees that, for large enough $n$,
 there will be enough treatment and control units near any test point
 $x$ for local methods to work.
 
+\section{Individualized Treatment Rules}
+In experiments, we observe a triplet $(\mathbf{x}, t, y)$ from each
+participant, where $\mathbf{x}=(x_1, x_2, \ldots, x_n)^T \in
+\mathcal{X}$ denotes the participant's covariates, $t \in \mathcal{T}
+= {-1,1}$ denotes the treatment assignment, and $y \in Y$ is the
+observed outcome, also called the "reward" in the literature on
+reinforcement learning. Note that $t=-1$ means the control in the
+context of ITR. Let $p(t|x)$ be the probability of assigning the participant
+with covariates $\mathbf{x}$ to the intervention $t$.
+
+An individual treatment rule (ITR) $d: X \rightarrow \mathcal{T}$ is a deterministic decision
+rule from subject $x$ into the intervention space $\mathcal{T}$. The
+value of $d$ satisfies
+$$V(d) = E \left [ \frac{y}{p(t|x)}\mathbb{I}_{t=d(\mathbf{x})}\right
+],$$
+where $\mathbb{I}(\cdot)$ is an indicator function. An optimal ITR, $d^{*}$, is a rule that has the maximal value such
+that,
+
+$$d^{*} \in \operatorname*{arg\,max}_d V(d).$$
+Finding $d^{*}$ is equivalent to minimizing the following equation:
+\begin{equation} \label{eq:d_min}
+d^{*} \in \operatorname*{arg\,min}_d E \left [
+  \frac{y}{p(t|x)}\mathbb{I}_{t \neq d(\mathbf{x})}\right
+]
+\end{equation}
+
+Assume that the observed data $\left \{
+  (\mathbf{x}_i,t_i,y_i),~i=1,\ldots , n \right \}$ are collected
+independently. For any decision function $f(\mathbf{x})$, let
+$d_f(\mathbf{x}) = sign(f(\mathbf{x}))$ be the associated rule, where
+$sign(u) = 1$ for $u > 0$ and $-1$ otherwise. The particular choice of
+the value of $sign(0)$ is not important. With the observed data, the
+weighted classification error in Equation \ref{eq:d_min} can be approximated by
+the empirical risk
+
+\begin{equation} \label{eq:d_empirical_min}
+  \frac{1}{n}\sum_{i=1}^{n}\frac{y_i}{p(t_i|x_i)}\mathbb{I}_{t_i \neq
+    d_f(\mathbf{x_i})} .
+\end{equation}
+
+It is well known that empirical risk minimization for a classification
+problem with the $0-1$ loss function is an NP-hard problem. To solve
+this difficulty, outcome weighted learning (OWL) is proposed by
+\cite{zhao2012estimating} using the hinge loss function and the
+regularization technique. In other words, instead of minimizing
+Equation~\ref{eq:d_empirical_min}, OWL aims to minimize
+
+\begin{equation} \label{eq:d_owl_empirical_min}
+  \frac{1}{n}\sum_{i=1}^{n}\frac{y_i}{p(t_i|x_i)}(1-t_if(\mathbf{x}_i))_{+}+\lambda\left
+    \| f \right \|^2 ,
+\end{equation}
+where $(u)_+=\max(u,0)$ is the positive part of $u$, $\left \| f
+\right \|$ is some norm for $f$, and $\lambda$ is a tuning parameter
+controlling the trade-off between empirical risk and complexity of the
+decision function $f$.
 \section{Bayesian Optimization}
 Bayesian optimization is a sequential design strategy for global optimization of black-box functions that does not require derivatives. Since the objective function is unknown, the Bayesian
 strategy is to treat it as a random function and place a prior over it. The prior captures our beliefs about the behaviour of the
