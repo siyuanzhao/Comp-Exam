@@ -32,3 +32,5 @@
 
 [AN INTRODUCTION TO MCMC SAMPLING METHODS](http://www.statistics.com/papers/LESSON1_Notes_MCMC.pdf)
 
+[Information gain](https://courses.cs.washington.edu/courses/cse455/10au/notes/InfoGain.pdf)
+> Slides on information gain. It gives an intuitive explanation of entropy and information gain.
