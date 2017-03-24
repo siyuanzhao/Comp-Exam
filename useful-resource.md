@@ -34,3 +34,5 @@
 
 [Information gain](https://courses.cs.washington.edu/courses/cse455/10au/notes/InfoGain.pdf)
 > Slides on information gain. It gives an intuitive explanation of entropy and information gain.
+
+[Design Matrix](https://en.wikipedia.org/wiki/Design_matrix)
