@@ -36,3 +36,14 @@
 > Slides on information gain. It gives an intuitive explanation of entropy and information gain.
 
 [Design Matrix](https://en.wikipedia.org/wiki/Design_matrix)
+
+[KL-divergence as an objective function](http://timvieira.github.io/blog/post/2014/10/06/kl-divergence-as-an-objective-function/)
+
+[Slides on Learning from the Wisdom of Crowds by Minimax Entropy](https://www.microsoft.com/en-us/research/wp-content/uploads/2012/12/MinimaxEnt.pdf)
+> This slides are easier for me to understand the idea in the paper.
+
+[Using Lagrange multipliers in optimization](http://kitchingroup.cheme.cmu.edu/blog/2013/02/03/Using-Lagrange-multipliers-in-optimization/)
+> There is a simple way to calculate partial derivative in this post.
+
+[Simple guide to confusion matrix terminology](http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/)
+> A good tutorial on confusion matrix.
