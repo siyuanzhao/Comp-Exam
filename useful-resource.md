@@ -34,3 +34,8 @@
 
 [Information gain](https://courses.cs.washington.edu/courses/cse455/10au/notes/InfoGain.pdf)
 > Slides on information gain. It gives an intuitive explanation of entropy and information gain.
+
+[KL-divergence as an objective function](http://timvieira.github.io/blog/post/2014/10/06/kl-divergence-as-an-objective-function/)
+
+[Slides on Learning from the Wisdom of Crowds by Minimax Entropy](https://www.microsoft.com/en-us/research/wp-content/uploads/2012/12/MinimaxEnt.pdf)
+> This slides are easier for me to understand the idea in the paper.
