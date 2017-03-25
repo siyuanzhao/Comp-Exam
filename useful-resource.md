@@ -47,3 +47,5 @@
 
 [Simple guide to confusion matrix terminology](http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/)
 > A good tutorial on confusion matrix.
+
+[An Introduction to Factor Graphs](http://people.binf.ku.dk/~thamelry/MLSB08/hal.pdf)
