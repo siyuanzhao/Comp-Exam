@@ -287,6 +287,59 @@ in an RKHS that minimizes an empirical risk function can be written as
 a linear combination of the kernel function evaluated at the training
 points.
 
+\section{Information Theory}
+The entropy of the random variable $X$, where $p(X = x_i) = p_i$, is
+defined as:
+\begin{equation} \label{eq:entropy}
+  \mathrm{H}[p] = -\sum_{i}p(x_i)\log p(x_i)
+\end{equation}
+
+Distributions $p(x_i)$ that are sharply peaked around a few values
+will have a relatively low entropy, whereas those that spread more
+evenly across many values will have higher entropy. Because $0 \leq
+p_i \geq 1$, the entropy is non-negative, and it will equal its
+minimum value of 0 when one of the $p_i = 1$ and all other $p_{j \neq
+  i} = 0$. The maximum entropy configuration can be found by
+maximizing $\mathrm{H}$ using a Lagrange multiplier to enforce the
+constraint on the probabilities.
+
+Now consider the joint distribution between two sets of variables
+$\mathbf{x}$ and $\mathbf{y}$ given by $p(\mathbf{x}, \mathbf{y})$. If
+the sets of variables are independent, then their join distribution
+will factorize into the product of their marginals $p(\mathbf{x},
+\mathbf{y}) = p(\mathbf{x})p(\mathbf{y})$. If the variables are not
+independent, we can gain some idea of whether they are 'close' to
+being independent by considering the Kullback-Leibler divergence
+between the joint distribution and the product of the marginals, given
+by
+
+\begin{align}
+    \mathrm{I}[\mathrm{x}, \mathrm{y}] &=
+                                         \mathrm{KL}(p(\mathrm{x},\mathrm{y}) \parallel
+                                         p(\mathrm{x})p(\mathrm{y}))
+                                         \nonumber \\
+& = - \iint p(\mathrm{x},\mathrm{y}) \log \left (
+  \frac{p(\mathrm{x})p(\mathrm{y})}{p(\mathrm{x}, \mathrm{y})} \right
+  ) \mathrm{d} x \, \mathrm{d} y \label{eq:mutual-info}
+\end{align}
+
+which is called the \textit{mutual information} between the variable
+$\mathrm{x}$ and $\mathrm{y}$. Using the sum and product rules of
+probability, we see that the mutual information is related to the
+conditional entropy through
+
+\begin{equation}
+  \mathrm{I}[\mathrm{x}, \mathrm{y}] = \mathrm{H}[\mathrm{x}] -
+  \mathrm{H}[\mathrm{x|y}] = \mathrm{H}[\mathrm{y}] -
+  \mathrm{H}[\mathrm{y|x}]
+\end{equation}
+
+From a Bayesian perspective, we can view $p(x)$ as the prior
+distribution for $\mathrm{x}$ and $p(\mathrm{x}|\mathrm{y})$ as the posterior
+distribution after we have observed new data $\mathrm{y}$. The mutual
+information therefore represents the reduction in uncertainty about
+$\mathrm{x}$ as a consequence of the new observation $\mathrm{y}$.
+
 \bibliographystyle{plain}
 \bibliography{references}
 \end{document}
