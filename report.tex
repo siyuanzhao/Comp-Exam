@@ -7,6 +7,7 @@
 \author{Siyuan Zhao}
 \date{March 2017}
 
+\usepackage[linesnumbered,ruled]{algorithm2e}
 \usepackage{amsmath, mathtools}
 \usepackage{amsfonts}
 \begin{document}
@@ -228,7 +229,9 @@ and the treatment, respectively.
 
 The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
 
-
+The analysis of a propensity score matched sample can mimic that of an
+RCT: one can directly compare outcomes between the treated and control
+subjects within the propensity score matched sample. 
 \section{Gaussian Processes}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 
@@ -287,6 +290,111 @@ in an RKHS that minimizes an empirical risk function can be written as
 a linear combination of the kernel function evaluated at the training
 points.
 
+\section{Information Theory}
+The entropy of the random variable $X$, where $p(X = x_i) = p_i$, is
+defined as:
+\begin{equation} \label{eq:entropy}
+  \mathrm{H}[p] = -\sum_{i}p(x_i)\log p(x_i)
+\end{equation}
+
+Distributions $p(x_i)$ that are sharply peaked around a few values
+will have a relatively low entropy, whereas those that spread more
+evenly across many values will have higher entropy. Because $0 \leq
+p_i \geq 1$, the entropy is non-negative, and it will equal its
+minimum value of 0 when one of the $p_i = 1$ and all other $p_{j \neq
+  i} = 0$. The maximum entropy configuration can be found by
+maximizing $\mathrm{H}$ using a Lagrange multiplier to enforce the
+constraint on the probabilities.
+
+Now consider the joint distribution between two sets of variables
+$\mathbf{x}$ and $\mathbf{y}$ given by $p(\mathbf{x}, \mathbf{y})$. If
+the sets of variables are independent, then their join distribution
+will factorize into the product of their marginals $p(\mathbf{x},
+\mathbf{y}) = p(\mathbf{x})p(\mathbf{y})$. If the variables are not
+independent, we can gain some idea of whether they are 'close' to
+being independent by considering the Kullback-Leibler divergence
+between the joint distribution and the product of the marginals, given
+by
+
+\begin{align}
+    \mathrm{I}[\mathrm{x}, \mathrm{y}] &=
+                                         \mathrm{KL}(p(\mathrm{x},\mathrm{y}) \parallel
+                                         p(\mathrm{x})p(\mathrm{y}))
+                                         \nonumber \\
+& = - \iint p(\mathrm{x},\mathrm{y}) \log \left (
+  \frac{p(\mathrm{x})p(\mathrm{y})}{p(\mathrm{x}, \mathrm{y})} \right
+  ) \mathrm{d} x \, \mathrm{d} y \label{eq:mutual-info}
+\end{align}
+
+which is called the \textit{mutual information} between the variable
+$\mathrm{x}$ and $\mathrm{y}$. Using the sum and product rules of
+probability, we see that the mutual information is related to the
+conditional entropy through
+
+\begin{equation}
+  \mathrm{I}[\mathrm{x}, \mathrm{y}] = \mathrm{H}[\mathrm{x}] -
+  \mathrm{H}[\mathrm{x|y}] = \mathrm{H}[\mathrm{y}] -
+  \mathrm{H}[\mathrm{y|x}]
+\end{equation}
+
+From a Bayesian perspective, we can view $p(x)$ as the prior
+distribution for $\mathrm{x}$ and $p(\mathrm{x}|\mathrm{y})$ as the posterior
+distribution after we have observed new data $\mathrm{y}$. The mutual
+information therefore represents the reduction in uncertainty about
+$\mathrm{x}$ as a consequence of the new observation $\mathrm{y}$.
+
+\section{Semi-Supervised Learning}
+In the context of semi-supervised learning, the training data consists
+of $l$ labeled instances $\left \{ (\mathbf{x}_i, y_i)
+\right \}_{i=1}^{l}$ and $u$ unlabeled instances $\left \{ (\mathbf{x}_j)
+\right \}_{j=l+1}^{l+u}$, often with $u \ll l$. The goal of
+semi-supervised learning is to learn a model with better performance
+from the training data than from labeled data alone. It is known that
+the labeled data can be hard and expensive to obtain since labels may
+require human experts, and the unlabeled data is often cheap in large
+quantity.
+
+\begin{figure}[h] \label{fg:ssl_model}
+\includegraphics[width=10cm]{ssl.png}
+\end{figure}
+
+Co-training \cite{blum1998combining} is a semi-supervised learning technique that requires two
+views of the data. It assumes that each example is described using two
+different feature sets that provide different, complementary
+information about the instance. Co-training first learns a separate
+classifier for each view using any labeled examples. The most
+confident predictions of each classifier on the unlabeled data are
+then used to iteratively construct additional labeled training
+data. The details of co-training algorithm is described in Algorithm~\ref{algo:co-training}.
+\begin{algorithm}[h] \label{algo:co-training}
+  \SetKwInOut{Input}{Input}
+  \Input{labeled data $\left \{ (\mathbf{x}_i, y_i)
+\right \}_{i=1}^{l}$, unlabeled data $\left \{ \mathbf{x}_j
+\right \}_{j=l+1}^{l+u}$ \\
+each instance has two views $\mathbf{x}_i=\left [ \mathbf{x}_i^{(1)},
+  \mathbf{x}_i^{(2)} \right ]$ \\
+and a learning speed $k$
+}
+Let $L_1 = L_2 = \left \{ (\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_l, y_l)
+\right \}.$ \\
+\Repeat {unlabeled data is used up}{
+  Train view-1 $f^{(1)}$ from $L_1$, view-2 $f^{(2)}$ from $L_2$ \\
+  Classify unlabeled data with $f^{(1)}$ and $f^{(2)}$ separately. \\
+  Add $f^{(1)}$'s top $k$ most-confident predictions $(\mathbf{x},
+  f^{(1)}(\mathbf{x}))$ to $L_2$ \\
+  Add $f^{(2)}$'s top $k$ most-confident predictions $(\mathbf{x},
+  f^{(2)}(\mathbf{x}))$ to $L_1$ \\
+  Remove these from the unlabeled data.
+}
+
+\caption{Co-training Algorithm for Semi-Supervised Learning}
+\end{algorithm}
+
+There are three important assumptions which guarantee the performance of
+co-training algorithm: 1). feature split $x=[x^{(1)};x^{(2)}]$
+exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
+classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
+given the class.
 \bibliographystyle{plain}
 \bibliography{references}
 \end{document}

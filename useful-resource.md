@@ -35,6 +35,8 @@
 [Information gain](https://courses.cs.washington.edu/courses/cse455/10au/notes/InfoGain.pdf)
 > Slides on information gain. It gives an intuitive explanation of entropy and information gain.
 
+[Design Matrix](https://en.wikipedia.org/wiki/Design_matrix)
+
 [KL-divergence as an objective function](http://timvieira.github.io/blog/post/2014/10/06/kl-divergence-as-an-objective-function/)
 
 [Slides on Learning from the Wisdom of Crowds by Minimax Entropy](https://www.microsoft.com/en-us/research/wp-content/uploads/2012/12/MinimaxEnt.pdf)
@@ -48,3 +50,5 @@
 
 [Principle of Maximum Entropy: Simple Form](http://www-mtl.mit.edu/Courses/6.050/2003/notes/chapter9.pdf)
 > A lecture note on principle of maximum entropy from an MIT course.
+
+[An Introduction to Factor Graphs](http://people.binf.ku.dk/~thamelry/MLSB08/hal.pdf)
