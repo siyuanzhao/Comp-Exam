@@ -45,3 +45,6 @@
 
 [Simple guide to confusion matrix terminology](http://www.dataschool.io/simple-guide-to-confusion-matrix-terminology/)
 > A good tutorial on confusion matrix.
+
+[Principle of Maximum Entropy: Simple Form](http://www-mtl.mit.edu/Courses/6.050/2003/notes/chapter9.pdf)
+> A lecture note on principle of maximum entropy from an MIT course.
