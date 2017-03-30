@@ -194,6 +194,17 @@ GP such as mean and variance are used to sample successive points. It
 is suitable for situations where cost function is costly to evaluate
 and MCMC techniques would not work.
 
+\subsection{Sequential method}
+The sequential approach is independent of the choice of prior and of
+the likelihood function and depends only on the assumption of i.i.d
+data. Sequential methods make use of observations one at a time, or in
+small batches, and then discard them before the next observations are
+used. They can be used, for example, in real-time learning scenarios
+where a steady stream of data is arriving, and predictions must be
+made before all of the data is seen. Because they do not require the
+whole data set to be stored or loaded into memory, sequential methods
+are also useful for large data sets.
+
 \section{Propensity Score Matching}
 A propensity score is the probability of a unit (e.g., student,
 classroom, school) being assigned to a particular treatment given a
