@@ -98,11 +98,14 @@ responses $Y_i$ are roughly identically distributed. Then the
 treatment effect $\hat{\tau}$ for any $x \in L(x)$ is estimated as
 following:
 
-\begin{align*}
+\begin{align} 
 \hat{\tau}(x) & = \frac{1}{\left | \left \{ i: W_i=1, X_i \in L(x) \right \}
-  \right |} \sum_{\left \{ i: W_i = 1, X_i \in L(x) \right \}} Y_i \\ & - \frac{1}{\left | \left \{ i: W_i=0, X_i \in L(x) \right \}
-  \right |} \sum_{\left \{ i: W_i = 0, X_i \in L(x) \right \}} Y_i
-\end{align*}
+                \right |} \sum_{\left \{ i: W_i = 1, X_i \in L(x)
+                \right \}} Y_i \nonumber \\
+              & - \frac{1}{\left | \left \{ i: W_i=0, X_i \in L(x) \right \}
+  \right |} \sum_{\left \{ i: W_i = 0, X_i \in L(x) \right \}} Y_i \label{eq:tree-treatment-effect}
+\end{align}
+
 RCF assumes that
 there is overlapping in the data, i.e., for some $\epsilon > 0$ and
 all $x \in \left [ 0, 1\right ]^d$,
@@ -112,6 +115,31 @@ $$\epsilon < \mathbb{P}\left [ W=1 \mid X=x \right ] < 1-\epsilon$$
 This condition effectively guarantees that, for large enough $n$,
 there will be enough treatment and control units near any test point
 $x$ for local methods to work.
+
+\subsection{Honest Trees and Forests}
+A tree is honest if, for each training example $i$, it only uses the
+response $Y_i$ to estimate the within-leaf treatment effect $\tau$
+using Equation~\ref{eq:tree-treatment-effect} or
+to decide where to place the splits, but not
+both. \cite{wager2015estimation} proposed two causal forest algorithms
+that satisfy this condition.
+
+The first algorithm, which is called double-sample tree, achieves
+honesty by dividing its training sub-sample into two halves
+$\mathcal{I}$ and $\mathcal{J}$. Then, it uses the
+$\mathcal{J}$-sample to place the splits, while holding out the
+$\mathcal{I}$-sample to do within-leaf estimation.
+
+Another way to build honest trees is to ignore the outcome $Y_i$ when
+placing splits, and instead first train a classification tree for the
+treatment assignments $W_i$. Such propensity trees can be particularly
+useful in observational studies, where we want to minimize bias due to
+variation in $e(x)$. Seeking estimators that match training examples
+based on estimated propensity is a longstanding idea from Propensity
+Score Matching (PSM).
+
+\section{Counterfactual Inference}
+\cite{Johansson2016-dh} proposed Balancing Neural Networks (BNN) which can be applied to solve the counterfactual inference problem. They used a form of regularizer to enforce the similarity between the distributions of representations learned for populations with different interventions, for example, the representations for students who received text hints versus those who received video hints.This reduces the variance from fitting a model on one distribution and applying it to another. Because of random assignment to the interventions in RCTs, the distributions of the populations within different interventions are highly likely to be identical. However, in the observational study, we may end up with the situation where only male students receive video hints and female students receive text hints. Without enforcing the similarity between the distributions of representations for male and female students, it is not safe to make a prediction of the outcome if male students receive text hints. In machine learning, "domain adaptation" refers to the dissimilarity of the distributions between the training data and the test data.
 
 \section{Individualized Treatment Rules}
 In experiments, we observe a triplet $(\mathbf{x}, t, y)$ from each
@@ -168,6 +196,7 @@ where $(u)_+=\max(u,0)$ is the positive part of $u$, $\left \| f
 \right \|$ is some norm for $f$, and $\lambda$ is a tuning parameter
 controlling the trade-off between empirical risk and complexity of the
 decision function $f$.
+
 \section{Bayesian Optimization}
 Bayesian optimization is a sequential design strategy for global optimization of black-box functions that does not require derivatives. Since the objective function is unknown, the Bayesian
 strategy is to treat it as a random function and place a prior over it. The prior captures our beliefs about the behaviour of the
@@ -182,7 +211,18 @@ of these. They all trade-off exploration and exploitation so as to
 minimize the number of function queries. As such, Bayesian
 optimization is well suited for functions that are very expensive to evaluate.
 
-In summary, Bayesian optimization is the combination of two main components: a surrogate model which captures all prior and observed information and a decision process which performs the optimal action, i.e.: where to sample next, based on the previous model.
+In summary, Bayesian optimization is the combination of two main
+components: a surrogate model which captures all prior and observed
+information and a decision process which performs the optimal action,
+i.e.: where to sample next, based on the previous model.
+
+Bayesian optimization is applicable in situations where one does not
+have a closed-form expression for the objective function, but where
+one can obtain noisy evaluations of this function at sampled
+values. It is particularly useful when these evaluations are costly,
+when one does not have access to derivatives, or when the problem at
+hand is non-convex.
+
 
 However, the Gaussian process (GP) is the most popular model due to
 its accuracy, robustness and flexibility, because Bayesian
@@ -193,6 +233,18 @@ the reproducing kernel Hilbert space (RKHS). In BO, attributes of the
 GP such as mean and variance are used to sample successive points. It
 is suitable for situations where cost function is costly to evaluate
 and MCMC techniques would not work.
+
+In many applications, the designs available to the experimenter have
+components that can be varied independently. For example, in designing
+an advertisement, one has choices such arkwork, font style, and
+size. If there are five choices for each, the total number of possible
+configurations is 125.
+
+In general, this number grows combinatorially in the number of
+components. This presents challenges for approaches such as the independent
+Thompson sampling, since the Thompson sampling models the arms as independent, which will lead
+to strategies that must try every option at least once. This rapidly
+becomes infeasible in the large spaces of real-world problems.
 
 \subsection{Sequential method}
 The sequential approach is independent of the choice of prior and of
@@ -406,7 +458,84 @@ co-training algorithm: 1). feature split $x=[x^{(1)};x^{(2)}]$
 exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
 classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
 given the class.
-\bibliographystyle{plain}
+
+\section{Reliable Crowdsourcing}
+In order to characterize the learning artifacts for certain features,
+e.g., media format, pedagogical approach, difficulty to understand,
+etc, we could crowdsource from students by ask them to rate the
+learning artifacts along these features. During this process, we might
+gather noisy rating from students due to the fact that students may
+have a wide ranging level of rating expertise which are unknown, and
+in some cases may be adversarial. To learn the ground truth of these
+learning artifacts, we need to aggregate their opinions to recover the
+true, unknown label of each learning artifacts.
+
+\cite{dawid1979maximum} were among the first to consider such a
+problem setup. They assume each workers are conditionally independent
+given the true labels and each worker is associated with a
+probabilistic confusion matrix that generates her labels. Each entry
+of the matrix indicates the probability that items in one class are
+labeled as another. Given the
+observed responses, the true labels for each items and the confusion
+matrices for each worker can be jointly estimated by a maximum
+likelihood method. The optimization can be implemented by the
+expectation-maximization (EM) algorithm.
+
+\cite{NIPS2009_3644} proposed a richer graphic model which includes
+item difficulty and the expertise of the worker.
+
+\cite{Shaham2016-nh} has proven that the Dawid and Skene model is
+equivalent to a Restricted Boltzmann Machine (RBM) with a single
+hidden node under the assumption that all workers are conditionally
+independent. Thus the posterior probabilities of the true labels can
+be estimated via a trained RBM.
+
+A RBM is an undirected bipartite graphical model, consisting of a
+visible layer $X$ and a hidden layer $H$. The visible layer consists
+of $d$ binary random variables and the hidden layer $m$ binary random
+variables. These two layers are fully connected to each other. A RBM
+is parametrized by $\lambda = (W, a, b)$, where $W$ is the weight
+matrix of the connections between the visible and hidden units, and
+$a,b$ are the bias vectors of the visible and hidden layers,
+respectively.
+
+A RBM implies the conditional probabilities
+
+\begin{align*}
+p_{\lambda}(X_i=1|H) &= \sigma (a_i+W_{i\cdot}H) \\
+p_{\lambda}(H_j=1|X) &= \sigma (b_j+X^{T}W_{\cdot j}),
+\end{align*}
+where $\sigma (z)$ is the sigmoid function, $W_{i\cdot}$ is the $i$-th
+row of $W$ and $W_{\cdot j}$ is its $j$-th column.
+
+To relax the assumption on the conditional independence of the
+variables $X_1,\ldots,X_d$, a RBM-based Deep Neural Net (DNN) is
+proposed to estimate the posterior probabilities
+$p_{\theta}(Y|X)$. The mechanism to stack multiple RBMs is that the
+hidden layer of each RBM is the input for the successive RBM. The RBMs
+are trained one at a time from bottom to top. Specifically, given
+training data $x^{(1)}, \ldots, x^{(n)} \in \{ 0,1 \}^d$, the bottom
+RBM is trained first, and then obtain the hidden representation of the
+first layer by sampling $h^{(i)}$ from the conditional RBM
+distribution $p_{\lambda}(H|X=x^{(i)})$. The vector $h^{(1)}, \ldots,
+h^{(n)}$ are then used as a training set for the second RBM and so on.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.95\columnwidth]{minimax_entropy.png}
+  \caption{Left: observed labels. Right: underlying
+    distributions. Highlights on both tables indicate that rows and
+    columns of the distributions are constrained by sums over observations.}
+  ~\label{fg:minimax_entropy_model}
+\end{figure}
+
+\cite{Zhou2012-ry} proposed a minimax entropy principle to estimate
+the ground truth given the observed labels by workers. The model is
+illustrated in Figure~\ref{fg:minimax_entropy_model}. Each row
+corresponds to a works indexed by $i$ (from 1 to $m$). Each column
+corresponds to an item to be labeled, indexed by $j$ (from 1 to $n$).
+
+\bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
 

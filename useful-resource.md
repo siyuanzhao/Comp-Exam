@@ -52,3 +52,7 @@
 > A lecture note on principle of maximum entropy from an MIT course.
 
 [An Introduction to Factor Graphs](http://people.binf.ku.dk/~thamelry/MLSB08/hal.pdf)
+
+[Decision Tree Flavors: Gini Index and Information Gain](http://www.learnbymarketing.com/481/decision-tree-flavors-gini-info-gain/)
+
+
