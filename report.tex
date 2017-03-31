@@ -533,8 +533,44 @@ h^{(n)}$ are then used as a training set for the second RBM and so on.
 the ground truth given the observed labels by workers. The model is
 illustrated in Figure~\ref{fg:minimax_entropy_model}. Each row
 corresponds to a works indexed by $i$ (from 1 to $m$). Each column
-corresponds to an item to be labeled, indexed by $j$ (from 1 to $n$).
+corresponds to an item to be labeled, indexed by $j$ (from 1 to
+$n$). Each item has an unobserved label represented as a vector
+$y_{jl}$, which is 1 when item $j$ is in class $l$ (from 1 to $c$),
+and 0 otherwise. Observed data is a tensor of labels $z_{ijk}$, which
+is 1 when the item $i$ is labeled as class $j$ by the worker $i$, and
+0 otherwise. We assume that $z_{ij}$ are drawn from
+$\pi_{ij}$. $\pi_{ij}$ can be represented as a tensor $\pi_{ijk}$,
+which is the probability that worker $i$ labels item $j$ as class
+$k$. The proposed model will estimate $y_{jl}$ from the observed
+$z_{ij}$.
 
+The maximum entropy model for $\pi_{ij}$ given $y_{jl}$ is as
+following:
+
+\begin{align}
+\max_{\pi} & -\sum_{i=1}^{m}\sum_{j=1}^{n}\sum_{k=1}^{c} \pi_{ijk}
+\ln \pi_{ijk} \nonumber \\
+  \mathrm{s.t.} & \sum_{i=1}^{m}\pi_{ijk} = \sum_{i=1}^{m}z_{ijk},
+                  \forall j,k, ~ \sum_{j=1}^{n}y_{jl}\pi_{ijk} =
+                  \sum_{j=1}^{n}y_{jl}z_{ijk} \forall i,k,l, \nonumber
+  \\
+  & \sum_{k=1}^{c}\pi_{ijk}=1, \forall i,j, \pi_{ijk} \geq 0, \forall
+    i,j,k. \label{eq:max_entropy}
+\end{align}
+
+To infer $y_{jl}$, they proposed to choose $y_{jl}$ to minimize the
+entropy in Equation~\ref{eq:max_entropy}.
+
+\begin{align}
+\min_{y}\max_{\pi} & -\sum_{i=1}^{m}\sum_{j=1}^{n}\sum_{k=1}^{c} \pi_{ijk}
+\ln \pi_{ijk} \nonumber \\
+  \mathrm{s.t.} & \sum_{i=1}^{m}\pi_{ijk} = \sum_{i=1}^{m}z_{ijk},
+                  \forall j,k, ~ \sum_{j=1}^{n}y_{jl}\pi_{ijk} =
+                  \sum_{j=1}^{n}y_{jl}z_{ijk} \forall i,k,l, \nonumber
+  \\
+  & \sum_{k=1}^{c}\pi_{ijk}=1, \forall i,j, \pi_{ijk} \geq 0, \forall
+    i,j,k. \label{eq:minimax_entropy}
+\end{align}
 \bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
