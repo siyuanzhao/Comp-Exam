@@ -300,6 +300,11 @@ Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data
 
 Gaussian processes is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
 
+The Gaussian process $\mathrm{GP}(\mu_0,k)$ is a non-parametric model
+that is fully characterized by its prior mean function $\mu_0 :
+\mathcal{X}\rightarrow \mathbb{R}$ and its positive-definite kernel,
+or covariance function, $k: \mathcal{X} \times \mathcal{X} \rightarrow
+\mathbb{R}$.
 \subsection{Probability distributions over functions with finite domains}
 Let $\mathcal{X} = \left \{ x_1, x_2, …, x_m \right \}$ be any finite set of elements. Consider the set $\mathcal{H}$ of all possible functions mapping from $\mathcal{X}$ to $\mathbf{R}$. For instance, one example of a function $f_0(\cdot) \in \mathcal{H}$ is given by
 
@@ -470,6 +475,7 @@ in some cases may be adversarial. To learn the ground truth of these
 learning artifacts, we need to aggregate their opinions to recover the
 true, unknown label of each learning artifacts.
 
+\subsection{Dawid-Skene Model}
 \cite{dawid1979maximum} were among the first to consider such a
 problem setup. They assume each workers are conditionally independent
 given the true labels and each worker is associated with a
@@ -481,9 +487,33 @@ matrices for each worker can be jointly estimated by a maximum
 likelihood method. The optimization can be implemented by the
 expectation-maximization (EM) algorithm.
 
-\cite{NIPS2009_3644} proposed a richer graphic model which includes
-item difficulty and the expertise of the worker.
 
+\subsection{GLAD}
+\cite{NIPS2009_3644} proposed a richer graphic model which includes
+item difficulty and the expertise of the worker. The difficulty of
+item is modeled by the parameter $1/\beta_j \in [0,\infty)$ where
+$\beta_j$ is constrained to be positive. Here $1/\beta_j = \infty$
+means the image is very ambiguous and hence the most proficient worker
+has a random chance of labeling it correctly. $1/\beta_j = 0$ means the item is
+so easy that even the most obtuse worker will always label it correctly.
+
+The expertise of each worker $i$ is modeled using the parameter
+$\alpha_i \in (-\infty, +\infty)$. Here $\alpha = +\infty$ means the
+worker always labels items correctly; $-\infty$ means the worker
+always labels items incorrectly.
+
+The labels given by worker $i$ to item $j$ are denoted as $L_{ij}$
+and are generated as follows:
+
+\begin{equation} \label{eq:glad_label}
+  p(L_{ij}=Z_j|\alpha_i , \beta_j) = \frac{1}{1+e^{-\alpha_i \beta_j}}
+\end{equation}
+
+As the difficulty $1/\beta_j$ of an item increases, the probability of
+the label being correct moves toward 0.5. Similarly, as the worker's
+expertise decreases (lower $\alpha_i$), the chance of correctly
+labeling drops to 0.5.
+\subsection{Deep Learning Approach}
 \cite{Shaham2016-nh} has proven that the Dawid and Skene model is
 equivalent to a Restricted Boltzmann Machine (RBM) with a single
 hidden node under the assumption that all workers are conditionally
@@ -529,6 +559,7 @@ h^{(n)}$ are then used as a training set for the second RBM and so on.
   ~\label{fg:minimax_entropy_model}
 \end{figure}
 
+\subsection{Minimax Entropy}
 \cite{Zhou2012-ry} proposed a minimax entropy principle to estimate
 the ground truth given the observed labels by workers. The model is
 illustrated in Figure~\ref{fg:minimax_entropy_model}. Each row
@@ -569,8 +600,10 @@ entropy in Equation~\ref{eq:max_entropy}.
                   \sum_{j=1}^{n}y_{jl}z_{ijk} \forall i,k,l, \nonumber
   \\
   & \sum_{k=1}^{c}\pi_{ijk}=1, \forall i,j, \pi_{ijk} \geq 0, \forall
-    i,j,k. \label{eq:minimax_entropy}
+    i,j,k, \sum_{l=1}^{c}y_{jl}=1, \forall j, y_{jl} \geq 0, \forall
+    j, l. \label{eq:minimax_entropy}
 \end{align}
+
 \bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
