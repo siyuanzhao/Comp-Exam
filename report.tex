@@ -128,8 +128,38 @@ The first algorithm, which is called double-sample tree, achieves
 honesty by dividing its training sub-sample into two halves
 $\mathcal{I}$ and $\mathcal{J}$. Then, it uses the
 $\mathcal{J}$-sample to place the splits, while holding out the
-$\mathcal{I}$-sample to do within-leaf estimation.
+$\mathcal{I}$-sample to do within-leaf estimation. The details of the
+algorithm is shown in Algorithm~\ref{algo:double-sample-trees}.
 
+\LinesNumberedHidden
+\begin{algorithm}[h]
+  \SetKwInOut{Input}{Input}
+  \Input{$n$ training examples of $(X_i, Y_i, W_i)$, where $X_i$ are
+    features, $Y_i$ is the response, and $W_i$ is the treatment
+    assignment. \\
+    A minimum leaf size $k$.
+  }
+
+  \caption{Double-sample Causal Trees}
+  \ShowLn Draw a random subsample of size $s$ from $\{1, \ldots, n\}$ without
+  replacement, and then divide it into two disjoint sets of size
+  $|\mathcal{I}|=\left \lfloor s/2 \right \rfloor$ and
+  $|\mathcal{J}|=\left \lceil s/2 \right \rceil$ \\
+  \ShowLn Grow a tree via recursive partitioning. The splits are chosen using
+  any data from the $\mathcal{J}$ sample and $X$- or $W$-observations
+  from the $\mathcal{I}$ sample, but without using $Y$-observations
+  from $\mathcal{I}$-sample. \\
+  \ShowLn Estimate leaf-wise response using only the $\mathcal{I}$-sample
+  observations. \\ [1\baselineskip]
+
+The algorithm estimates $\hat{\tau}(x)$ using
+Equation~\ref{eq:tree-treatment-effect} on the $\mathcal{I}$
+sample. The splitting criteria is to maximize the variance of
+$\hat{\tau}(X_i)$ for $i \in \mathcal{J}$. Each leaf of the tree must
+contain $k$ or more $\mathcal{I}$-sample observations of each
+treatment class.
+\label{algo:double-sample-trees}
+\end{algorithm}
 Another way to build honest trees is to ignore the outcome $Y_i$ when
 placing splits, and instead first train a classification tree for the
 treatment assignments $W_i$. Such propensity trees can be particularly
@@ -138,8 +168,67 @@ variation in $e(x)$. Seeking estimators that match training examples
 based on estimated propensity is a longstanding idea from Propensity
 Score Matching (PSM).
 
+\LinesNumberedHidden
+\begin{algorithm}[h]
+  \SetKwInOut{Input}{Input}
+  \Input{$n$ training examples of $(X_i, Y_i, W_i)$, where $X_i$ are
+    features, $Y_i$ is the response, and $W_i$ is the treatment
+    assignment. \\
+    A minimum leaf size $k$.
+  }
+  \ShowLn Draw a random subsample $\mathcal{I} \in {1, \ldots, n}$ of
+  size $|\mathcal{I}| = s$ (no replacement). \\
+  \ShowLn Train a classification tree using sample $\mathcal{I}$ where
+  the outcome is the treatment assignment, i.e., on the $(X_i, W_i)$
+  pairs with $i \in \mathcal{I}$. Each leaf of the tree must have $k$
+  or more observations of each treatment class. \\
+  \ShowLn Estimate $\tau(x)$ using
+  Equation~\ref{eq:tree-treatment-effect} on the leaf containing $x$.
+  \caption{Propensity Trees}
+\end{algorithm}
 \section{Counterfactual Inference}
-\cite{Johansson2016-dh} proposed Balancing Neural Networks (BNN) which can be applied to solve the counterfactual inference problem. They used a form of regularizer to enforce the similarity between the distributions of representations learned for populations with different interventions, for example, the representations for students who received text hints versus those who received video hints.This reduces the variance from fitting a model on one distribution and applying it to another. Because of random assignment to the interventions in RCTs, the distributions of the populations within different interventions are highly likely to be identical. However, in the observational study, we may end up with the situation where only male students receive video hints and female students receive text hints. Without enforcing the similarity between the distributions of representations for male and female students, it is not safe to make a prediction of the outcome if male students receive text hints. In machine learning, "domain adaptation" refers to the dissimilarity of the distributions between the training data and the test data.
+\cite{Johansson2016-dh} proposed Balancing Neural Networks (BNN) which
+can be applied to solve the counterfactual inference problem. They
+used a form of regularizer to enforce the similarity between the
+distributions of representations learned for populations with
+different interventions, for example, the representations for students
+who received text hints versus those who received video hints.This
+reduces the variance from fitting a model on one distribution and
+applying it to another. Because of random assignment to the
+interventions in RCTs, the distributions of the populations within
+different interventions are highly likely to be identical. However, in
+the observational study, we may end up with the situation where only
+male students receive video hints and female students receive text
+hints. Without enforcing the similarity between the distributions of
+representations for male and female students, it is not safe to make a
+prediction of the outcome if male students receive text hints. In
+machine learning, "domain adaptation" refers to the dissimilarity of
+the distributions between the training data and the test data.
+
+In the "treated" and the "control" setting, we refer to the observed and unobserved outcomes as the factual outcome $y^F(x)$, and the counterfactual outcome $y^{CF}(x)$ respectively. In other words, when the participant $x$ is assigned to the "control" ($t = 0$), $y^F(x)$ is equal to $Y_1(x)$, and $y^{CF}(x)$ is equal to $Y_0(x)$. The other way around, $y^F(x)$ is equal to $Y_0(x)$, and $y^{CF}(x)$ is equal to $Y_1(x)$.
+
+Given $n$ samples $\left \{ (x_i, t_i, y_i^F) \right \}_{i=1}^n$, where $y_i^F = t_i \cdot Y_1(x_i) + (1-t_i)Y_0(x_i)$, a common approach for estimating the ITE is to learn a function $f : X \times T \rightarrow Y$ such that $f(x_i, t_i) \approx y_i^F$. The estimated ITE is then:
+$$\hat{ITE}(x_i) = \left\{\begin{matrix} y_i^F - f(x_i, 1-t_i), & t_i = 1.\\ f(x_i, 1-t_i) - y_i^F, & t_i = 0. \end{matrix}\right. $$
+
+We assume $n$ samples $\left \{ (x_i, t_i, y_i^F) \right \}_{i=1}^n$ form an empirical distribution $\hat{p}^F  = \left \{ (x_i, t_i) \right \}_{i=1}^n$. We call this empirical distribution $\hat{p}^F \sim p^F$ the empirical factual distribution. In order to calculate ITE, we need to infer the counterfactual outcome which is dependent on the empirical distribution $\hat{p}^{CF}  = \left \{ (x_i, 1-t_i) \right \}_{i=1}^n$. We call the empirical distribution $\hat{p}^{CF} \sim p^{CF}$. The $p^{F}$ and $p^{CF}$ may not be equal because the distributions of the control and the treated populations may be different. The inequality of two distributions may cause the counterfactual inference over a different distribution than the one observed from the experiment. In machine learning terms, this scenario is usually referred to as domain adaptation, where the distribution of features in test data are different than the distribution of features in training data.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.95\columnwidth]{cfr.png}
+  \caption{CFR for ITE estimation. $L$ is a loss function, IPM is an integral probability metric}.
+  ~\label{fg:cfr-model}
+\end{figure}
+
+To learn a representation of deep features $\Phi$, the RCN uses fully connected layers with ReLu activation function, where $Relu(z) = max(0, z)$. We need to generalize from factual distribution to counterfactual distribution in the feature representation $\Phi$ to obtain accurate estimation of counterfactual outcome. The common successful approaches for domain adaptation encourage similarity between the latent feature representations w.r.t the different distributions. This similarity is often enforced by minimizing a certain distance between the domain-specific hidden features. The distance between two distributions is usually referred to as the discrepancy distance, introduced by \cite{Mansour2009-fh}, which is a hypothesis class dependent distance measure tailored for domain adaptation. 
+
+In this paper we use an Integral Probability Metric (IPM) measure of distance between two distributions $p_0 = p(x|t = 0)$, and $p_1 = p(x|t = 1)$, also known as the control and treated distributions. The IPM for $p_0$ and $p_1$ is defined as
+$$\mathrm{IPM}_{\mathcal{F}}(p_0, p_1) := \sup_{f\in \mathcal{F}} \left |\int_S f dp_0 -\int_S f d p_1 \right |,$$
+
+where $\mathcal{F}$ is a class of real-valued bounded measurable functions on $S$. 
+
+The choice of functions is the crucial distinction between IPMs \cite{Sriperumbudur2009-pf}. Two specific IPMs are used in our experiments: the Maximum Mean Discrepancy (MMD), and the Wasserstein distance. $\mathrm{IPM}_{\mathcal{F}}$ is called MMD, when $\mathcal{F} = \left \{ f : \left \| f \right \| _\mathcal{H}\leq 1\right \}$, where $\mathcal{H}$ represents a reproducing kernel Hilbert space (RKHS) with $k$ as its reproducing kernel. In other words, the family of norm-1 reproducing kernel Hilbert space (RKHS) functions lead to the MMD. The family of 1-Lipschitz functions $\mathcal{F} = \left \{ f:\left \| f\right \|_L \leq 1 \right \}$, where $\left \| f\right \|_L$ is the Lipschitz semi-norm of a bounded continuous real-valued function $f$, make IPM the Wasserstein distance. Both the Wasserstein and MMD metrics have consistent estimators which can be efficiently computed in the finite sample case \cite{Sriperumbudur2012-sz}. The important property of IPM is that $$p_0 = p_1~\mathrm{iff}~ \mathrm{IPM}_{\mathcal{F}}(p_0, p_1) = 0.$$
+
+The representation with reduction of the discrepancy between the control and the treated populations helps the model to focus on balancing features across two populations when inferring the counterfactual outcomes. For instance, if in an experiment, almost no male student ever received intervention A, inferring how male students would react to intervention A is highly prone to error and a more conservative use of the gender feature might be warranted.
 
 \section{Individualized Treatment Rules}
 In experiments, we observe a triplet $(\mathbf{x}, t, y)$ from each
@@ -198,33 +287,44 @@ controlling the trade-off between empirical risk and complexity of the
 decision function $f$.
 
 \section{Bayesian Optimization}
-Bayesian optimization is a sequential design strategy for global optimization of black-box functions that does not require derivatives. Since the objective function is unknown, the Bayesian
+Bayesian optimization is a sequential model-based approach for global
+optimization of an unknown objective function $f$. The problem can be
+mathematically expressed as:
+
+\begin{equation}
+  \mathbf{x}^* = \underset{\mathbf{x} \in \mathcal{X}}{\mathrm{arg \,
+      max} \, f(\mathbf{x})}
+\end{equation}
+where $\mathcal{X}$ is the design space of interest. Since the objective function is unknown, the Bayesian
 strategy is to treat it as a random function and place a prior over it. The prior captures our beliefs about the behaviour of the
 function. After gathering the function evaluations, which are treated
 as data, the prior is updated to form the posterior distribution
-over the objective function. The posterior distribution, in turn, is
-used to construct an acquisition function that determines what the
-next query point should be. Examples of acquisition functions includes
+over the objective function. Equipped with the posterior distribution,
+an acquisition function $\alpha: \mathcal{X} \rightarrow \mathbb{R}$
+is induced to determines what the
+next query point should be. The acquisition function leverages the
+uncertainty in the posterior to trade off between the exploration and
+the exploitation. Examples of acquisition functions includes
 probability of improvement, expected improvement, Bayesian expected
 losses, upper confidence bounds (UCB), Thompson sampling and mixtures
 of these. They all trade-off exploration and exploitation so as to
 minimize the number of function queries. As such, Bayesian
 optimization is well suited for functions that are very expensive to evaluate.
 
+In this setting, Bayesian optimization is considered as a sequential
+search algorithm which, at round $n$, selects a query point
+$\mathbf{x}_{n+1}$ at which to evaluate $f$ and observe
+$y_{n+1}$. After $N$ queries, the algorithm produces the best estimate
+$\bar{\mathbf{x}}_N$. Under the context of multi-armed bandit
+problems, function $f$ is the reward function.
+  
 In summary, Bayesian optimization is the combination of two main
-components: a surrogate model which captures all prior and observed
-information and a decision process which performs the optimal action,
-i.e.: where to sample next, based on the previous model.
+components: a surrogate probabilistic model which captures our beliefs
+about the behavior of the unknown objective function and observed
+information, and an acquisition function which performs the selection
+of the optimal sequence of queries based on the previous model.
 
-Bayesian optimization is applicable in situations where one does not
-have a closed-form expression for the objective function, but where
-one can obtain noisy evaluations of this function at sampled
-values. It is particularly useful when these evaluations are costly,
-when one does not have access to derivatives, or when the problem at
-hand is non-convex.
-
-
-However, the Gaussian process (GP) is the most popular model due to
+The Gaussian process (GP) is the most popular model due to
 its accuracy, robustness and flexibility, because Bayesian
 optimization is mainly usesd in blck-box scenarios. The range of
 applicaility of a Gaussian process is defined by its kernel function,
@@ -234,6 +334,25 @@ GP such as mean and variance are used to sample successive points. It
 is suitable for situations where cost function is costly to evaluate
 and MCMC techniques would not work.
 
+\begin{algorithm}[h] \label{algo:bo}
+  \SetKwInOut{Input}{Input}
+  \Input{$n$ observations $\mathcal{D}=\{ (\mathbf{x}_i,
+    y_i)\}_{i=1}^n$ from objective function $f$}
+
+ \caption{Bayesian optimization with Gaussian process}
+ \For{$t = n+1,n+2,\ldots$} {
+   select new $\mathbf{x}_{t}$ by maximizing acquisition function
+   $\alpha$
+   $$
+     \mathbf{x}_{t} = \underset{\mathbf{x}}{\mathrm{arg \, max}} \, \alpha(\mathbf{x};\mathcal{D})
+     $$\\
+     query objective function to observe $y_{t} =
+     f(\mathbf{x}_{t})$ \\
+     augment data $\mathcal{D}=\{ \mathcal{D},
+     (\mathbf{x}_{t}, y_{t}) \}$\\
+     update statistical model
+ }
+\end{algorithm}
 In many applications, the designs available to the experimenter have
 components that can be varied independently. For example, in designing
 an advertisement, one has choices such arkwork, font style, and
@@ -245,6 +364,53 @@ components. This presents challenges for approaches such as the independent
 Thompson sampling, since the Thompson sampling models the arms as independent, which will lead
 to strategies that must try every option at least once. This rapidly
 becomes infeasible in the large spaces of real-world problems.
+
+\subsection{Thompson Sampling}
+Thompson sampling for Beta-Bernoulli bandit perhaps is the simplest non-trivial multi-armed
+bandit strategy in Bayesian optimization. Bernoulli bandit problem is
+the bandit problem when the rewards are either 0 or 1, and for arm $i$
+the probability of success (reward=1) is $\mu_i$. The Thompson
+sampling maintains Bayesian priors on the Bernoulli means
+$\mu_i$'s. Beta distribution turns out to be a very convenient choice
+of priors for Bernoulli rewards. The pdf of $\mathrm{Beta}(\alpha,
+\beta)$ with parameters $\alpha > 0, \beta > 0$ is given by
+\begin{equation}
+  f(x;\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha-1}(1-x)^{\beta-1}.
+\end{equation}
+
+The mean of $\mathrm{Beta}(\alpha,\beta)$ is $\alpha / (\alpha +
+\beta)$; and higher the $\alpha, \beta$, tighter is the concentration
+of $\mathrm{Beta}(\alpha,\beta)$ around the mean. If the prior
+for each arm is a $\mathrm{Beta}(\alpha,\beta)$ distribution, then
+after observing a Bernoulli trial, the posterior distribution is
+simply $\mathrm{Beta}(\alpha + 1,\beta)$ or
+$\mathrm{Beta}(\alpha,\beta +1)$, depending on whether the trial
+resulted in a success or failure, respectively. Thompson sampling then
+samples from these posterior distributions across all arms and chooses
+the arm with largest sample value. This procedure is summarized in
+Algorithm~\ref{algo:thompson-sampling}.
+
+\begin{algorithm}[h] \label{algo:thompson-sampling}
+  \SetKwInOut{Input}{Input}
+  \Input{$\alpha, \beta$: hyperparameters of the beta prior}
+
+  \caption{Thompson sampling for Beta-Bernoulli bandit}
+  Initialize $n_{a,0}=n_{a,1}=i=0$ for all $K$ arms $a$ \\
+  \Repeat{stopping criterion reached} {
+    \For{$a = 1,\ldots, K$}{
+      $w_a \sim \mathrm{Beta}(\alpha + n_{a,1}, \beta + n_{a,0})$
+    }
+    $a_i = \underset{a}{\mathrm{arg\, max}}\, w_a$ \\
+    Observe $y_i$ by pulling arm $a_i$ \\
+    \eIf{$y_i = 0$}{
+      $n_{a_i,0} = n_{a_i,0} + 1$
+      
+    }{
+      $n_{a_i,1} = n_{a_i,1} + 1$
+    }
+    $i = i + 1$ \\
+ }
+\end{algorithm}
 
 \subsection{Sequential method}
 The sequential approach is independent of the choice of prior and of
@@ -295,16 +461,106 @@ The possibility of bias arises because the apparent difference in outcome betwee
 The analysis of a propensity score matched sample can mimic that of an
 RCT: one can directly compare outcomes between the treated and control
 subjects within the propensity score matched sample. 
-\section{Gaussian Processes}
+\section{Gaussian Processes in Bandit Settings}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 
-Gaussian processes is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
+The Gaussian process is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
 
 The Gaussian process $\mathrm{GP}(\mu_0,k)$ is a non-parametric model
 that is fully characterized by its prior mean function $\mu_0 :
 \mathcal{X}\rightarrow \mathbb{R}$ and its positive-definite kernel,
 or covariance function, $k: \mathcal{X} \times \mathcal{X} \rightarrow
 \mathbb{R}$.
+
+Let $\mathcal{D}_n = \left \{( \mathbf{x}_i, y_i \right )\}$ denote a
+set of $n$ observations and $\mathbf{x}$ denote the arbitrary test
+point. The random variable $f(\mathbf{x})$ is also a GP distribution
+conditioned on observations $\mathcal{D}_n$ with following mean
+$\mu_n(\mathbf{x})$ and variance $\sigma_n^2(\mathbf{x})$:
+\begin{align}
+ \mu_n(\mathbf{x}) &= \mu_0(\mathbf{x}) +
+                     \mathbf{k}(\mathbf{x})^T(\mathbf{K}+\sigma^2\mathbf{I})^{-1}(\mathbf{y}-\mathbf{m})
+  \\
+  \sigma_n^2(\mathbf{x}) &= k(\mathbf{x}, \mathbf{x}) -
+                           \mathbf{k}(\mathbf{x})^T(\mathbf{K}+\sigma^2\mathbf{I})^{-1}\mathbf{k}(\mathbf{x})
+\end{align}
+where $m_i := \mu_0(\mathbf{x}_i)$, $K_{i,j} := k(\mathbf{x_i, x_j})$,
+and $\mathbf{k}(\mathbf{x})$ is a vector of covariance terms between
+$\mathbf{x}$ and $\mathbf{x}_{1:n}$.
+
+The posterior mean and variance evaluated at any point $\mathbf{x}$
+represent the model's prediction and uncertainty in the objective
+function at the point $\mathbf{x}$. In order to apply GP under the
+setting of multi-armed bandit, we need a acquisition function to select
+the next query point given the posterior model. The acquisition
+function should be carefully design to trade off exploration of the
+search area and exploitation of current promising areas.
+
+\subsection{GP-UCB}
+To decrease uncertainty globally, one strategy could be to pick the
+point which maximums the variance $\mathbf{x}_{n+1}=
+\underset{\mathbf{x} \in
+  D}{\mathrm{arg\,max}}~\sigma_n(\mathbf{x})$. However, this strategy
+is not well suited for multi-armed bandit problem since it can be
+wasteful. Another idea is to
+select the point which maximizes the expected reward given the
+posterior model $\mathbf{x}_{n+1}=
+\underset{\mathbf{x} \in
+  D}{\mathrm{arg\,max}}~\mu_n(\mathbf{x})$. However, this idea is too
+greedy and tends to end up with a local optima. To balance exploration
+and exploitation, a combined strategy is to choose
+\begin{equation}
+  \mathbf{x}_{n+1} = \underset{\mathbf{x} \in D}{\mathrm{arg \,
+      max}}\,\mu_n(\mathbf{x})+\beta_n \sigma_n(\mathbf{x}),
+\end{equation} \label{eq:gp-ucb-query}
+where $\beta_n$ are constants. There are theoretically motivated
+guidelines for setting and scheduling the hyperparameter $\beta_n$ to
+achieve optimal regret.
+
+Since Equation~\ref{eq:gp-ucb-query} is an upper confidence bound of
+the marginal posterior $P(f(\mathbf{x})|\mathbf{y}_n)$, a natural
+interpretation of this strategy is that it selects the point
+$\mathbf{x}$ such that $f(\mathbf{x})$ is a reasonable upper bound on
+$f(\mathbf{x})$. This algorithm is called Gaussian process upper
+confidence bound (GP-UCB), introduced by \cite{Srinivas2010-hi}. The
+GP-UCB selection rule is motivated by the UCB algorithm for the
+classical multi-armed bandit problem.
+
+\subsection{Contextual GP-UCB}
+Motivated by GP-UCB algorithm mentioned above, \cite{Krause2011-sb}
+extended the generalization of this algorithm by incorporating
+contextual information
+\begin{equation}
+  \mathbf{x}_{n+1} = \underset{\mathbf{x} \in D}{\mathrm{arg \,
+      max}}\,\mu_n(\mathbf{x}, \mathbf{z}_n)+\beta_n
+  \sigma_n(\mathbf{x}, \mathbf{z}_n),
+\end{equation} \label{eq:cgp-ucb-query}
+where $z_n \in Z$ is the contextual information from a set $Z$ of
+contexts, $\mu_n(\cdot)$ and $\sigma_n^2(\cdot)$ are the posterior mean
+and variance of the GP conditioned on observations $\mathcal{D}_n =
+\left \{( \mathbf{x}_i, \mathbf{z}_i, y_i \right )\}.$ The authors
+called the selection rule the contextual Gaussian process UCB
+algorithm (GCP-UCB).
+
+To derive the kernel $k$ on the product space $Z\times X$ of contexts and
+actions, a natural approach to start with kernel functions $k_Z:
+Z\times Z \rightarrow \mathbb{R}$ and $k_X:X \times X \rightarrow
+\mathbb{R}$ on the space of contexts and actions. \cite{Krause2011-sb}
+proposed two possibilities of constructing composite kernel $k$ from
+context kernel $k_Z$ and action kernel $k_X$. One is to calculate a
+product kernel $k=k_Z\otimes k_X$, by setting
+\begin{equation}
+  (k_Z\otimes k_X)((\mathbf{z}, \mathbf{x}),(\mathbf{z}^{\prime},
+  \mathbf{x}^{\prime})) = k_Z(\mathbf{z}, \mathbf{z}^{\prime})k_X(\mathbf{x}, \mathbf{x}^{\prime}).
+\end{equation}
+
+An alternative is to calculate the additive kernel $k=k_Z\oplus k_X$,
+by setting
+
+\begin{equation}
+  (k_Z\oplus k_X)((\mathbf{z}, \mathbf{x}),(\mathbf{z}^{\prime},
+  \mathbf{x}^{\prime})) = k_Z(\mathbf{z}, \mathbf{z}^{\prime})+k_X(\mathbf{x}, \mathbf{x}^{\prime}).
+\end{equation}
 \subsection{Probability distributions over functions with finite domains}
 Let $\mathcal{X} = \left \{ x_1, x_2, …, x_m \right \}$ be any finite set of elements. Consider the set $\mathcal{H}$ of all possible functions mapping from $\mathcal{X}$ to $\mathbf{R}$. For instance, one example of a function $f_0(\cdot) \in \mathcal{H}$ is given by
 
@@ -315,7 +571,6 @@ $$p(h) = \prod_{i=1}^{m} \frac{1}{\sqrt{2\pi}\sigma}\mathrm{exp}(-\frac{1}{2\sig
 $$
 
 In the example above, we show that probability distributions over functions with finite domains can be represented using a finite-dimensional multivariate Gaussian distribution over function outputs $f(x_1),...,f(x_m)$ at a finite number of input points $x1, ..., x_m$
-
 \subsection{Probability distributions over functions with infinite domains}
 A stochastic process is a collection of random variables, $\left \{ f(x): x \in \mathcal{X} \right \}$, indexed by elements from some set $\mathcal{X}$, known as the index set. A Gaussian process is a stochastic process such that any finite sub-collection of random variables has a multivariate Gaussian distribution.
 
