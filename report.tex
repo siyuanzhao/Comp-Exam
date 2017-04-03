@@ -270,22 +270,65 @@ the empirical risk
     d_f(\mathbf{x_i})} .
 \end{equation}
 
-It is well known that empirical risk minimization for a classification
-problem with the $0-1$ loss function is an NP-hard problem. To solve
-this difficulty, outcome weighted learning (OWL) is proposed by
+\cite{Qian2011-vz} proposed a two-step procedure that first estimates
+a conditional mean for the outcome and then determines the treatment
+rule by comparing the conditional means across various treatment.
+
+In contrast, outcome weighted learning (OWL) is proposed by
 \cite{zhao2012estimating} using the hinge loss function and the
 regularization technique. In other words, instead of minimizing
 Equation~\ref{eq:d_empirical_min}, OWL aims to minimize
 
-\begin{equation} \label{eq:d_owl_empirical_min}
+\begin{equation}
   \frac{1}{n}\sum_{i=1}^{n}\frac{y_i}{p(t_i|x_i)}(1-t_if(\mathbf{x}_i))_{+}+\lambda\left
-    \| f \right \|^2 ,
+    \| f \right \|^2 ~\label{eq:d_owl_empirical_min},
 \end{equation}
 where $(u)_+=\max(u,0)$ is the positive part of $u$, $\left \| f
 \right \|$ is some norm for $f$, and $\lambda$ is a tuning parameter
 controlling the trade-off between empirical risk and complexity of the
 decision function $f$.
 
+\cite{Zhou_undated-ps} pointed out that decision rule in
+Equation~\ref{eq:d_owl_empirical_min} is
+affected by a simple shift of the outcome $Y$ and proposed Residual
+weighted learning (RWL) to relieve this issue. The idea behind RWL is
+to introduce a function $g$ to reduce the variance of
+$\frac{y-g(\mathbf{x})}{p(t|\mathbf{x})}\mathbb{I}_{t \neq
+  d(\mathbf{x})}$ and a reasonable candidate of $g$ is
+\begin{equation}
+  g^{*}(\mathbf{x}) = \frac{\mathbb{E}(y|\mathbf{x},
+    t=1)+\mathbb{E}(y|\mathbf{x}, t=-1)}{2} = \mathbb{E} \left (
+    \frac{y}{2p(t, \mathbf{x})} | \mathbf{x} \right ).~\label{eq:g-choice}
+\end{equation}
+
+RWL thus is to minimize the following empirical risk:
+\begin{equation}
+   \frac{1}{n}\sum_{i=1}^{n}\frac{y_i-\hat{g}^{*}(\mathbf{x}_i)}{p(t_i|\mathbf{x_i})}\mathbb{I}_{t_i \neq
+    d_f(\mathbf{x_i})}
+  ~\label{eq:rwl-risk}
+\end{equation}
+where $\hat{g}^{*}$ is an estimate of $g^{*}$. For simplicity, let
+$\hat{r}_i = y_i - \hat{g}^{*}(\mathbf{x}_i)$. As in OWL,
+\cite{Zhou_undated-ps} consider a surrogate loss function $T$ to replace
+the 0-1 loss in Equation~\ref{eq:rwl-risk}. The non-convex loss $T$
+has the following form:
+\begin{equation}
+T(u) =  \left\{\begin{array}{ll}
+ 0 & \mathrm{if} \: u \geq 1, \\ 
+ (1-u)^2 & \mathrm{if} \: 0 \leq u < 1, \\ 
+ 2-(1+u)^2 & \mathrm{if} \: -1 \leq u < 0, \\ 
+ 2 & \mathrm{if} \: u < -1
+\end{array}\right.
+\end{equation}
+It is called the smoothed ramp loss in \cite{Zhou_undated-ps}. By
+incorporating the regularization, RWL is eventually aimed to minimize
+the following empirical risk:
+\begin{equation}
+    \frac{1}{n}\sum_{i=1}^{n}\frac{\hat{r}_i}{p(t_i|x_i)}T(t_if(\mathbf{x}_i))_{+}+\lambda\left
+    \| f \right \|^2 ~\label{eq:d_owl_empirical_min},
+\end{equation}
+where $\left \| f \right \|$ is the norm for $f$, and $\lambda$ is a
+tuning parameter.
 \section{Bayesian Optimization}
 Bayesian optimization is a sequential model-based approach for global
 optimization of an unknown objective function $f$. The problem can be
@@ -424,10 +467,23 @@ whole data set to be stored or loaded into memory, sequential methods
 are also useful for large data sets.
 
 \section{Propensity Score Matching}
-A propensity score is the probability of a unit (e.g., student,
+A propensity score \cite{rosenbaum1983central} is the probability of a unit (e.g., student,
 classroom, school) being assigned to a particular treatment given a
 set of observed covariates. Propensity scores are used to reduce
 selection bias by equating groups based on these covariates.
+
+Suppose that we have a binary treatment $T=\{0,1\}$, an outcome $Y$, and
+background variables $X$. The propensity score is defined as the
+conditional probability of treatment given background variables:
+$$p(x):= \Pr(T=1 \mid X=x)$$
+Let $Y(0)$ and $Y(1)$ denote the potential outcomes under the control
+and the treatment, respectively.
+
+The actual propensity score in observational experiments is
+unknown and it can be estimated using statistical or machine
+learning models from the experiment data. The most commonly used model
+is a logistic regression model, in which treatment assignment $T$ is
+regressed on background variables $X$.
 
 Propensity score matching (PSM) entails forming matched sets of treated and
 untreated subjects who share a similar value of the propensity
@@ -446,15 +502,6 @@ the matched sample. If the outcome is binary, the effect of treatment
 can be estimated as the difference between the proportion of subjects
 experiencing the event in each of the two groups (treated
 vs. untreated) in the matched sample.
-
-Suppose that we have a binary treatment $T={0,1}$, an outcome $Y$, and
-background variables $X$. The propensity score is defined as the
-conditional probability of treatment given background variables:
-
-$$p(x):= \Pr(T=1 \mid X=x)$$
-
-Let $Y(0)$ and $Y(1)$ denote the potential outcomes under the control
-and the treatment, respectively.
 
 The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
 
