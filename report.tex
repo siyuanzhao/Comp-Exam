@@ -5,7 +5,7 @@
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 \title{Report for Comp Exam}
 \author{Siyuan Zhao}
-\date{March 2017}
+\date{April 2017}
 
 \usepackage[linesnumbered,ruled]{algorithm2e}
 \usepackage{amsmath, mathtools}
@@ -65,7 +65,7 @@ In observational studies, the treated subjects often differ
 systematically from untreated subjects. In general, $E[Y(1)\mid t=1]
 \neq E[Y(1)]$ holds. Thus, an unbiased estimate of the average
 treatment effect cannot be obtained by directly comparing outcomes
-between the two treatment groups.
+between the the treated and the control groups.
 
 \subsection{Strong Ignorability}
 The treatment assignment is defined to be strongly ignorable
@@ -78,7 +78,7 @@ probability to receive either treatment. The aforementioned first
 condition is also referred to as the "no unmeasured confounders"
 assumption that all variables that affect treatment assignment and
 outcome have been measured.
-\section{Random Causal Forest}
+\section{Random Causal Forests}
 \cite{wager2015estimation} proposed random causal forest (RCF) to
 infer treatment effect. From the conceptual point of view, trees and forests can be viewed as
 nearest neighbor methods with an adaptive neighborhood metric. Given
@@ -941,6 +941,23 @@ entropy in Equation~\ref{eq:max_entropy}.
     j, l. \label{eq:minimax_entropy}
 \end{align}
 
+\subsection{Control Items}
+Control items with known answers can be used to evaluation workers'
+reliability and bias, and hence weight their answers accordingly on target
+items with unknown answers. Clearly, there is a trade-off in this
+scenario: having workers answer more control items gives better
+estimates of their reliability and bias, but leaves fewer opportunities for the
+target items. On the other hand, using fewer control items gives poor
+estimates of worker's reliability and bias, which leads to a bad
+result when aggregating workers' answers. Aforementioned methods
+(except for majority voting) evaluates workers' reliability by
+comparing their agreement with other workers. Control items can be
+incorporated into these methods.
+
+\cite{Liu2013-ck} examined the effectiveness of control items and
+provided insights on how many control items are enough under
+different scenarios, which can help crowdsourcing practitioners make
+their own decisions.
 \section{Natural Language Processing for Enhancing Learning}
 \subsection{Confusion Detector}
 Given the enormous student/instructor ratio in a MOOC's discussion
