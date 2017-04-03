@@ -396,17 +396,6 @@ and MCMC techniques would not work.
      update statistical model
  }
 \end{algorithm}
-In many applications, the designs available to the experimenter have
-components that can be varied independently. For example, in designing
-an advertisement, one has choices such arkwork, font style, and
-size. If there are five choices for each, the total number of possible
-configurations is 125.
-
-In general, this number grows combinatorially in the number of
-components. This presents challenges for approaches such as the independent
-Thompson sampling, since the Thompson sampling models the arms as independent, which will lead
-to strategies that must try every option at least once. This rapidly
-becomes infeasible in the large spaces of real-world problems.
 
 \subsection{Thompson Sampling}
 Thompson sampling for Beta-Bernoulli bandit perhaps is the simplest non-trivial multi-armed
@@ -455,6 +444,34 @@ Algorithm~\ref{algo:thompson-sampling}.
  }
 \end{algorithm}
 
+\subsection{Choice between function predictor and multi-armed bandit algorithm}
+In many applications, the designs available to the experimenter have
+components that can be varied independently. For example, in designing
+an advertisement, one has choices such arkwork, font style, and
+size. If there are five choices for each, the total number of possible
+configurations is 125.
+
+In general, this number grows combinatorially in the number of
+components. This presents challenges for approaches such as the independent
+Thompson sampling, since the Thompson sampling models the arms as independent, which will lead
+to strategies that must try every option at least once. This rapidly
+becomes infeasible in the large spaces of real-world problems.
+
+Even if the total number of possible design configuration is
+relatively small, it is still challenging for multi-armed bandit
+algorithms when the number of available subjects is limited for these
+algorithms to figure out the optimal arm.
+
+To alleviate this issue, a commonly used approach is to learn a
+function, whose input is a feature vector of the arm and output is
+associated reward of the arm, capturing dependence between the arms. Assume that each possible arm $a$ has an
+associated feature vector $\mathbf{x}_a\in \mathbb{R}^d$. The expected
+reward of each arm can be expressed as a function of this feature
+vector, such as $f(a) = f(\mathbf{x}_a)$. The goal is to learn this
+function $f:\mathbb{R}^d \rightarrow \mathbb{R}$ from the experiment
+data in order to choose the arm with the highest reward among all
+possible arms.
+
 \subsection{Sequential method}
 The sequential approach is independent of the choice of prior and of
 the likelihood function and depends only on the assumption of i.i.d
@@ -465,6 +482,62 @@ where a steady stream of data is arriving, and predictions must be
 made before all of the data is seen. Because they do not require the
 whole data set to be stored or loaded into memory, sequential methods
 are also useful for large data sets.
+
+\section{Online Learning vs. Batch Learning}
+In machine learning, online machine learning is a method of machine learning in which data becomes available in a sequential order and is used to update our best predictor for future data at each step, as opposed to batch learning techniques which generate the best predictor by learning on the entire training data set at once.
+\section{Semi-Supervised Learning}
+In the context of semi-supervised learning, the training data consists
+of $l$ labeled instances $\left \{ (\mathbf{x}_i, y_i)
+\right \}_{i=1}^{l}$ and $u$ unlabeled instances $\left \{ (\mathbf{x}_j)
+\right \}_{j=l+1}^{l+u}$, often with $u \ll l$. The goal of
+semi-supervised learning is to learn a model with better performance
+from the training data than from labeled data alone. It is known that
+the labeled data can be hard and expensive to obtain since labels may
+require human experts, and the unlabeled data is often cheap in large
+quantity.
+
+\begin{figure}[h] \label{fg:ssl_model}
+  \centering
+\includegraphics[width=10cm]{ssl.png}
+\end{figure}
+
+Co-training \cite{blum1998combining} is a semi-supervised learning technique that requires two
+views of the data. It assumes that each example is described using two
+different feature sets that provide different, complementary
+information about the instance. Co-training first learns a separate
+classifier for each view using any labeled examples. The most
+confident predictions of each classifier on the unlabeled data are
+then used to iteratively construct additional labeled training
+data. The details of co-training algorithm is described in Algorithm~\ref{algo:co-training}.
+\begin{algorithm}[h] \label{algo:co-training}
+  \SetKwInOut{Input}{Input}
+  \Input{labeled data $\left \{ (\mathbf{x}_i, y_i)
+\right \}_{i=1}^{l}$, unlabeled data $\left \{ \mathbf{x}_j
+\right \}_{j=l+1}^{l+u}$ \\
+each instance has two views $\mathbf{x}_i=\left [ \mathbf{x}_i^{(1)},
+  \mathbf{x}_i^{(2)} \right ]$ \\
+and a learning speed $k$
+}
+Let $L_1 = L_2 = \left \{ (\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_l, y_l)
+\right \}.$ \\
+\Repeat {unlabeled data is used up}{
+  Train view-1 $f^{(1)}$ from $L_1$, view-2 $f^{(2)}$ from $L_2$ \\
+  Classify unlabeled data with $f^{(1)}$ and $f^{(2)}$ separately. \\
+  Add $f^{(1)}$'s top $k$ most-confident predictions $(\mathbf{x},
+  f^{(1)}(\mathbf{x}))$ to $L_2$ \\
+  Add $f^{(2)}$'s top $k$ most-confident predictions $(\mathbf{x},
+  f^{(2)}(\mathbf{x}))$ to $L_1$ \\
+  Remove these from the unlabeled data.
+}
+
+\caption{Co-training Algorithm for Semi-Supervised Learning}
+\end{algorithm}
+
+There are three important assumptions which guarantee the performance of
+co-training algorithm: 1). feature split $x=[x^{(1)};x^{(2)}]$
+exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
+classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
+given the class.
 
 \section{Propensity Score Matching}
 A propensity score \cite{rosenbaum1983central} is the probability of a unit (e.g., student,
@@ -483,15 +556,20 @@ The actual propensity score in observational experiments is
 unknown and it can be estimated using statistical or machine
 learning models from the experiment data. The most commonly used model
 is a logistic regression model, in which treatment assignment $T$ is
-regressed on background variables $X$.
+regressed on background variables $X$. Behind logistic regression, the
+use of bagging or boosting \cite{Lee2010-zr}, tree-based model
+(Propensity trees) and causal random forests
+\cite{wager2015estimation}, and neural networks
+\cite{setoguchi2008evaluating} have been proposed to estimate the
+propensity score.
 
-Propensity score matching (PSM) entails forming matched sets of treated and
+The purpose of Propensity score matching (PSM) is to form matched sets of treated and
 untreated subjects who share a similar value of the propensity
 score. PSM allows one to estimate the average treatment effect for the
-treated (ATT). The ATT is the average effect of treatment on those
+treated (ATT) \cite{imbens2004nonparametric}. The ATT is the average effect of treatment on those
 subjects who ultimately receive the treatment. The most common
 implementation of PSM is one-to-one or pair matching, in which pairs
-of treated and untreated subjects are formed, such that matched
+of the control and the treated subjects are formed, such that matched
 subjects have similar values of the propensity score. Once a matched
 sample has been formed, the treatment effect can be estimated by
 directly comparing outcomes between treated and untreated subjects in
@@ -500,14 +578,14 @@ treatment can be estimated as the difference between the mean outcome
 for treated subjects and the mean outcome for untreated subjects in
 the matched sample. If the outcome is binary, the effect of treatment
 can be estimated as the difference between the proportion of subjects
-experiencing the event in each of the two groups (treated
-vs. untreated) in the matched sample.
+experiencing the event in each of the two groups (the treated
+vs. the control) in the matched sample. In summary, the analysis of a propensity score matched sample can mimic that of an
+RCT: one can directly compare outcomes between the treated and the control
+subjects within the propensity score matched sample. 
+
 
 The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
 
-The analysis of a propensity score matched sample can mimic that of an
-RCT: one can directly compare outcomes between the treated and control
-subjects within the propensity score matched sample. 
 \section{Gaussian Processes in Bandit Settings}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 
@@ -713,59 +791,6 @@ distribution after we have observed new data $\mathrm{y}$. The mutual
 information therefore represents the reduction in uncertainty about
 $\mathrm{x}$ as a consequence of the new observation $\mathrm{y}$.
 
-\section{Semi-Supervised Learning}
-In the context of semi-supervised learning, the training data consists
-of $l$ labeled instances $\left \{ (\mathbf{x}_i, y_i)
-\right \}_{i=1}^{l}$ and $u$ unlabeled instances $\left \{ (\mathbf{x}_j)
-\right \}_{j=l+1}^{l+u}$, often with $u \ll l$. The goal of
-semi-supervised learning is to learn a model with better performance
-from the training data than from labeled data alone. It is known that
-the labeled data can be hard and expensive to obtain since labels may
-require human experts, and the unlabeled data is often cheap in large
-quantity.
-
-\begin{figure}[h] \label{fg:ssl_model}
-\includegraphics[width=10cm]{ssl.png}
-\end{figure}
-
-Co-training \cite{blum1998combining} is a semi-supervised learning technique that requires two
-views of the data. It assumes that each example is described using two
-different feature sets that provide different, complementary
-information about the instance. Co-training first learns a separate
-classifier for each view using any labeled examples. The most
-confident predictions of each classifier on the unlabeled data are
-then used to iteratively construct additional labeled training
-data. The details of co-training algorithm is described in Algorithm~\ref{algo:co-training}.
-\begin{algorithm}[h] \label{algo:co-training}
-  \SetKwInOut{Input}{Input}
-  \Input{labeled data $\left \{ (\mathbf{x}_i, y_i)
-\right \}_{i=1}^{l}$, unlabeled data $\left \{ \mathbf{x}_j
-\right \}_{j=l+1}^{l+u}$ \\
-each instance has two views $\mathbf{x}_i=\left [ \mathbf{x}_i^{(1)},
-  \mathbf{x}_i^{(2)} \right ]$ \\
-and a learning speed $k$
-}
-Let $L_1 = L_2 = \left \{ (\mathbf{x}_1, y_1), \ldots, (\mathbf{x}_l, y_l)
-\right \}.$ \\
-\Repeat {unlabeled data is used up}{
-  Train view-1 $f^{(1)}$ from $L_1$, view-2 $f^{(2)}$ from $L_2$ \\
-  Classify unlabeled data with $f^{(1)}$ and $f^{(2)}$ separately. \\
-  Add $f^{(1)}$'s top $k$ most-confident predictions $(\mathbf{x},
-  f^{(1)}(\mathbf{x}))$ to $L_2$ \\
-  Add $f^{(2)}$'s top $k$ most-confident predictions $(\mathbf{x},
-  f^{(2)}(\mathbf{x}))$ to $L_1$ \\
-  Remove these from the unlabeled data.
-}
-
-\caption{Co-training Algorithm for Semi-Supervised Learning}
-\end{algorithm}
-
-There are three important assumptions which guarantee the performance of
-co-training algorithm: 1). feature split $x=[x^{(1)};x^{(2)}]$
-exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
-classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
-given the class.
-
 \section{Reliable Crowdsourcing}
 In order to characterize the learning artifacts for certain features,
 e.g., media format, pedagogical approach, difficulty to understand,
@@ -776,6 +801,16 @@ have a wide ranging level of rating expertise which are unknown, and
 in some cases may be adversarial. To learn the ground truth of these
 learning artifacts, we need to aggregate their opinions to recover the
 true, unknown label of each learning artifacts.
+
+\subsection{Majority Voting}
+Given each item is labeled by different workers, it is a
+straightforward approach to take the majority label as the true
+label. From reported experimental results on real crowdcourcing data
+\cite{Snow2008-rm}, majority voting performs significantly better on
+average than individual workers. However, majority voting considers
+each item independently and gives the same weight across all workers
+(expertise and adversary)
+who label the item when aggregating true label.
 
 \subsection{Dawid-Skene Model}
 \cite{dawid1979maximum} were among the first to consider such a
@@ -906,6 +941,36 @@ entropy in Equation~\ref{eq:max_entropy}.
     j, l. \label{eq:minimax_entropy}
 \end{align}
 
+\section{Natural Language Processing for Enhancing Learning}
+\subsection{Confusion Detector}
+Given the enormous student/instructor ratio in a MOOC's discussion
+forums, it is difficulty for an instructor to read all posts in a
+MOOC's discussion forums. To address this issue, \cite{Agrawal2015-hp}
+collected and created the Stanford MOOCPosts dataset: a corpus
+composed of 29,604 anonymized learner forum posts from eleven Stanford
+University public online classes. Each post in the MOOCPosts dataset
+was scored across six dimensions -- confusion, sentiment, urgency,
+question, answer, and opinion -- and subsequently augmented with
+additional metadata. Then the authors built a confusion classifier from
+the Stanford MOOCPost dataset to automatically detect confusion from
+students posts and proposed a recommendation algorithm, which takes the
+student confusion as input, to automatically recommended a
+video lecture from a collection of several video lectures related to
+the course.
+\subsection{Automated Essay Scoring}
+Automated grading is a critical part of Massive Open Online Courses (MOOCs) system and any intelligent tutoring systems (ITS) at scale. Essay writing is usually a common student assessment process in schools and universities. In this task, students are required to write essays of various length, given a prompt or essay topic. Some standard tests, such as Test of English as a Foreign Language (TOEFL) and Graduate Record Examination (GRE), assess student writing skills. Manually grading these essay will be time-consuming. Thus automated essay scoring (AES) systems has been used in these tests to reduce the time and cost of grading essays. Moreover, as massive open online courses (MOOCs) become widespread and the number of students enrolled in one course increases, the need for grading and providing feedback on written assignments are ever critical.
+
+AES has employed numerous efforts to improving its performance. AES uses statistical and Natural Language Processing (NLP) techniques to automatically predict a score for an essay based on the essay prompt and rubric. Most existing AES systems are built on the basis of predefined features, e.g. number of words, average word length, and number of spelling errors, and a machine learning algorithm \cite{Chen2013-zw}. It is normally a heavy burden to find out effective features for AES. Moreover, the performance of the AES systems is constrained by the effectiveness of the predefined features. Recently another kind of approach has emerged, employing neural network models to learn the features automatically in an end-to-end manner \cite{Taghipour2016-ns}. By this means, a direct prediction of essay scores can be achieved without performing any feature extraction. The model based on long short-term memory (LSTM) networks in \cite{Taghipour2016-ns} has demonstrated promise in accomplishing multiple types of automated grading tasks.
+
+\subsection{NLP in PeerAssist}
+The goal of PeerAssist is to crowdsource the explanation (in the
+format of texts) of how to solve a
+given problem from students and apply multi-armed bandit algorithm to
+efficiently select the most helpful and useful peer explanation from all collected
+peer explanations for a given problem. The effectiveness of each peer
+explanations is measured in three dimensions: teacher's rating (thumb
+up or thumb down), student's rating (thumb up or thumb down), and the
+student next problem correctness after receiving the peer explanation.
 \bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
