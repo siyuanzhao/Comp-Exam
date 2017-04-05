@@ -499,13 +499,17 @@ semi-supervised learning is to learn a model with better performance
 from the training data than from labeled data alone. It is known that
 the labeled data can be hard and expensive to obtain since labels may
 require human experts, and the unlabeled data is often cheap in large
-quantity.
+quantity. Figure~\ref{fg:ssl_model} illustrates how unlabeled data
+help models achieve a better performance.
 
-\begin{figure}[h] \label{fg:ssl_model}
+\begin{figure}[h] 
   \centering
-\includegraphics[width=10cm]{ssl.png}
+  \includegraphics[width=10cm]{ssl.png}
+  \caption{Illustrative example on how semi-supervised learning helps
+    the model have a better performance.}~\label{fg:ssl_model}
 \end{figure}
 
+\subsection{Co-training}
 Co-training \cite{blum1998combining} is a semi-supervised learning technique that requires two
 views of the data. It assumes that each example is described using two
 different feature sets that provide different, complementary
@@ -543,6 +547,18 @@ co-training algorithm: 1). feature split $x=[x^{(1)};x^{(2)}]$
 exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
 classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
 given the class.
+
+\subsection{Application in PeerASSIST}
+Semi-supervised learning approaches come in handy in PeerASSIST when
+we try to learn a function to predict the effectiveness of peer
+explanations. In the setting of PeerASSIST, not every peer explanation will be received by students,
+and thus, some of the explanations have no observed data on their
+effectiveness (e.g., the popularity, next problem correctness). When
+learning the function, these peer explanations without observed data
+are discarded, which is a waste of the data. Moreover, if there are not enough
+observed data, it becomes difficult to accurately learn the
+function. Semi-supervised learning approaches can be applied in this
+scenario to learn a better function.
 
 \section{Propensity Score Matching}
 A propensity score \cite{rosenbaum1983central} is the probability of a unit (e.g., student,
@@ -591,7 +607,7 @@ subjects within the propensity score matched sample.
 
 The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
 
-\section{Gaussian Processes in Bandit Settings}
+\section{Gaussian Processes in Bandit Setting}
 Bayesian algorithms do not attempt to identify ‘best-fit’ models of the data (or similarly, make 'best guess' predictions for new test inputs). Instead, they compute a posterior distribution over models (or similarly, compute posterior predictive distributions for new test input). These distributions provide a useful way to quantify our uncertainty in model estimates, and to exploit our knowledge of this uncertainty in order to make more robust predictions on new test points.
 
 The Gaussian process is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
@@ -993,6 +1009,142 @@ peer explanations for a given problem. The effectiveness of each peer
 explanations is measured in three dimensions: teacher's rating (thumb
 up or thumb down), student's rating (thumb up or thumb down), and the
 student next problem correctness after receiving the peer explanation.
+
+\section{Peer Review}
+I find these three papers
+\cite{patchan2016understanding,kaufman2011students,patchan2015understanding}
+related to my dissertation. The summary of research findings from
+these paper is listed below.
+
+\cite{patchan2016understanding} pointed out that research on such peer assessments has found that, in general, peers
+are capable of providing valid ratings, and their feedback is usually
+just as effective as an instructor's feedback in help students improve
+their draft and sometimes more effective. Further, participating in
+peer assessment improves writing ability.
+
+\cite{kaufman2011students} found that students
+sometimes regard peer assessment as unfair and often believe that peers are
+unqualified to review and assess students’ work. Furthermore, students’ perceptions about
+the fairness of peer assessment drop significantly following students’ experience in doing
+peer assessment. Students’ fairness perceptions—and drops in those perceptions—are most
+significantly associated with their perceptions about the extent to which peers’ feedback is
+useful and positive. However, students’ perceptions appear to be unrelated to the extent of
+their revision work.
+
+\cite{patchan2015understanding} found that reviewer ability and text quality did not affect the amount of
+feedback provided (i.e., number of comments and length of
+comments). Low reviewer provided more praise than high reviewers
+whereas high reviewers provided more criticism than low
+reviewers. This criticism described more problems and offered more
+solutions. There was one interesting interaction between reviewer
+ability and text quality -- high reviewers described more problems in
+the low-quality texts than in the high-quality texts, whereas low
+reviewers did not make this distinction.
+
+\cite{patchan2016understanding} found several interesting interactions
+between two factors. Often lower-ability writers benefited more from
+receiving feedback from lower-ability reviewers, while higher-ability
+writers benefited equally from receiving feedback from lower-ability
+and higher-ability reviewers.
+
+\section{Learnersourcing Subgoal Labels}
+\cite{Weir2015-hg} presented a three-stage workflow for learners to generate
+subgoal labels for how-to video while they are learning from the
+videos. The goal of the first stage (Generation) is to let learners submit the
+subgoal labels after a certain interval during watching the
+videos. The goal of the second stage (Evaluation) is to let learners select the
+most relevant answer for the video section, as well as discard
+potential spam answers. The goal of the third stage (Proofreading) is
+to let learners evaluate the most popular subgoal labels from stage 2
+for quality and eventually agree on a final label for that
+subgoal. During stage 2 and stage 3, learners always have a option to
+refine the label.
+
+In PeerAssist, only students who receive 0 on a problem are
+prompted with a peer explanation from one of students who answer the same
+problem correctly. Then these students have a option to give a rating
+(thumb up or thumb down) to the peer explanation that they
+receive. The students, who answer the problem correctly in the first
+attempt, do not have a chance seeing and rating the peer
+explanations. If
+a certain problem is relatively easy, there will be few students who
+receive 0 and it is difficult to find the optimal peer explanations
+based on students' ratings. Even if the problem is relatively
+difficult, we miss the contribution from the students with correct
+answer in the first attempt when deciding the optimal peer
+explanations. Motivated by \cite{Weir2015-hg}, we can apply two-stage
+workflow to collect ratings from students in terms of the quality of
+the peer explanations after they submit an answer. Assume that there
+are several peer explanations available for a given problem and the
+ranking of these peer explanations are already decided by some
+algorithm (e.g., multi-armed bandit algorithm) based on the history data.
+
+On stage 1, students are prompted with several (i.e., 3) peer
+explanations and have a option to rate these explanations after they
+submit an answer. The goal of this stage is to collect students'
+opinions on these explanations and use these data as one of the
+indicators to determine the most effective explanation and discard
+spam explanations. In terms of
+which explanations should be prompted to students on this stage,
+several simple approaches can be applied: random selection from all
+available explanations or newly added explanations. Exploration strategy can be applied in this scenario. For the purpose of
+exploration, explanations with high uncertainty are prompted with
+students. This strategy can potentially reduce the uncertainty of
+these explanations and help multi-armed bandit algorithm efficiently
+find the optimal explanations.
+
+On stage 2, student are prompted with the currently optimal peer explanation
+from the ranking algorithm and asked to evaluate whether this peer
+explanation is highly effective. The goal of this stage is to let
+students to evaluate the optimal explanation for quality and analog to
+the goal of exploration strategy in multi-armed bandit algorithm.
+
+\section{HCOMP \& CSCW}
+\cite{Glassman2016-yy}
+Personalized support for students is a gold standard in education,
+but it scales poorly with the number of students. Prior
+work on learnersourcing presented an approach for learners
+to engage in human computation tasks while trying to learn
+a new skill. Our key insight is that students, through their
+own experience struggling with a particular problem, can
+become experts on the particular optimizations they implement
+or bugs they resolve. These students can then generate
+hints for fellow students based on their new expertise. We
+present workflows that harvest and organize students’ collective
+knowledge and advice for helping fellow novices through
+design problems in engineering. Systems embodying each
+workflow were evaluated in the context of a college-level
+computer architecture class with an enrollment of more than
+two hundred students each semester. We show that, given
+our design choices, students can create helpful hints for their
+peers that augment or even replace teachers’ personalized assistance,
+when that assistance is not available.
+
+\cite{Yim2017-zt}
+Group activities that use Google Docs for simultaneous
+collaborative writing and editing are increasingly common
+in higher education. Although studies show that
+synchronous collaboration can bring multiple benefits, such
+as enhanced productivity and writing quality, little is known
+about these writing practices in classrooms and their impact
+on students’ writing. Using a mixed method approach, we
+conducted an empirical study that explores the different
+styles of synchronous collaboration in 45 Google Docs
+documents produced by 82 undergraduate students, and how
+students’ practices affect the specific dimensions of the final
+text including quality. The results suggest that (a) out of
+four styles, Divide and Conquer style tended to produce
+better quality text whereas Main Writer had the lowest
+quality scores, and that (b) balanced participation and
+amount of peer editing led to longer texts with higher
+quality scores for content, evidence, but not organization or
+mechanics. Given these results, we suggest several design
+features for collaborative writing systems and propose
+guidelines for instructional practices.
+
+\cite{Yoon2016-nk}
+New multi-modal annotation tools hold the promise of bringing the benefits of face-to-face contact to remote, asynchronous interactions. One such system, RichReview++, incorporates new techniques to improve access to the embedded multimedia commentary and allows users to annotate with new modalities, like deictic gestures. We conducted a series of field deployments of RichReview++ to characterize how these features benefit students using them for activities in the university classroom. Our first deployment investigated the use of multi-modal annotations as a way for instructors to provide feedback on student term papers. Our second deployment used annotations to support peer discussion about assigned readings in a graduate-level course. We found that presenting voice comments as interactive waveforms seems to facilitate students' consumption of the instructor's voice comments. We also found that gestural annotations clarify voice and give annotators a quick and lightweight way to alter the scope of their voice comments. Based on these results, we suggest ways to best leverage multi-modal annotation tools in education environments.
+
 \bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
