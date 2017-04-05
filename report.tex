@@ -504,8 +504,8 @@ help models achieve a better performance.
 
 \begin{figure}[h] 
   \centering
-  \includegraphics[width=10cm]{ssl.png}
-  \caption{Illustrative example on how semi-supervised learning helps
+  \includegraphics[width=0.95\columnwidth]{ssl.png}
+  \caption{An illustrative example on how semi-supervised learning helps
     the model have a better performance.}~\label{fg:ssl_model}
 \end{figure}
 
@@ -1000,8 +1000,8 @@ Automated grading is a critical part of Massive Open Online Courses (MOOCs) syst
 
 AES has employed numerous efforts to improving its performance. AES uses statistical and Natural Language Processing (NLP) techniques to automatically predict a score for an essay based on the essay prompt and rubric. Most existing AES systems are built on the basis of predefined features, e.g. number of words, average word length, and number of spelling errors, and a machine learning algorithm \cite{Chen2013-zw}. It is normally a heavy burden to find out effective features for AES. Moreover, the performance of the AES systems is constrained by the effectiveness of the predefined features. Recently another kind of approach has emerged, employing neural network models to learn the features automatically in an end-to-end manner \cite{Taghipour2016-ns}. By this means, a direct prediction of essay scores can be achieved without performing any feature extraction. The model based on long short-term memory (LSTM) networks in \cite{Taghipour2016-ns} has demonstrated promise in accomplishing multiple types of automated grading tasks.
 
-\subsection{NLP in PeerAssist}
-The goal of PeerAssist is to crowdsource the explanation (in the
+\subsection{NLP in PeerASSIST}
+The goal of PeerASSIST is to crowdsource the explanation (in the
 format of texts) of how to solve a
 given problem from students and apply multi-armed bandit algorithm to
 efficiently select the most helpful and useful peer explanation from all collected
@@ -1009,6 +1009,24 @@ peer explanations for a given problem. The effectiveness of each peer
 explanations is measured in three dimensions: teacher's rating (thumb
 up or thumb down), student's rating (thumb up or thumb down), and the
 student next problem correctness after receiving the peer explanation.
+
+A potential application of NLP techniques to PeerASSIST is to build a
+classifier to predict the probability of a peer explanation being an
+effective one based on the content of the explanation. As mentioned
+above, NLP techniques, especially deep learning approaches for NLP,
+have achieved promising results on text classification tasks. The
+predicted probabilities can potentially used to select the optimal
+explanation when one is needed to be delivered to the students. In
+this scenario, we can deliver the explanation with the highest
+probability to students. Another possible use of the predicted
+probabilities is to treat these values as a part of the contextual
+information for the explanations and incorporate this contextual
+information into contextual multi-armed bandit algorithms.
+
+The explanations collected from students are not always of good
+quality. Since the classifier can automatically detect explanations
+with bad quality (i.e., the explanations with low probability values),
+one can quickly filter out these potential bad explanations, which saves multi-armed bandit algorithm from wasting attempts trying these explanations.
 
 \section{Peer Review}
 I find these three papers
