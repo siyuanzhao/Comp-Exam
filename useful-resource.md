@@ -55,4 +55,12 @@
 
 [Decision Tree Flavors: Gini Index and Information Gain](http://www.learnbymarketing.com/481/decision-tree-flavors-gini-info-gain/)
 
+[Conditional Entropy (wiki)](https://en.wikipedia.org/wiki/Conditional_entropy)
+
+[Mutual Information (wiki)](https://en.wikipedia.org/wiki/Mutual_information)
+
+[Lecture note on Entropy and mutual information](http://www.info612.ece.mcgill.ca/lecture_02.pdf)
+
+[Visualization for Bayesian Optimization](https://github.com/fmfn/BayesianOptimization/blob/master/examples/visualization.ipynb)
+> Show the changes in the posterior distribution after iterations.
 
