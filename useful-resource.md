@@ -64,3 +64,5 @@
 [Visualization for Bayesian Optimization](https://github.com/fmfn/BayesianOptimization/blob/master/examples/visualization.ipynb)
 > Show the changes in the posterior distribution after iterations.
 
+[Information Geometry](http://math.ucr.edu/home/baez/information/information_geometry_6.html)
+> Give a good interpretation of Radon-Nikodym derivative
