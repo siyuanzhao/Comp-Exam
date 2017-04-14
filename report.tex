@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
-\title{Report for Comp Exam}
+\title{Report for Comprehensive Exam}
 \author{Siyuan Zhao}
 \date{April 2017}
 
@@ -13,26 +13,17 @@
 \begin{document}
 
 \maketitle
-\section{Problem Setup}
-\subsection{Randomized Controlled Trials}
-In RCTs, participants are randomly assigned to conditions so treatment is assigned by randomization. As a consequence of
-randomization, an unbiased estimate of the ATE can be directly
-computed from the data. An unbiased estimate of the ATE is
-$E[Y_i(1)-Y_i(0)]=E[Y(1)] - E[Y(0)]$.
 
-\subsection{Observational Studies}
-An observational study has the same intent as a randomized experiment:
-to estimate a causal effect. However, an observational study differs
-from a RCT in one design issue: the use of randomization to allocate
-participants to treatment and control groups.
+\tableofcontents
 
-In observational studies, the treated subjects often differ
-systematically from untreated subjects. In general, $E[Y(1)\mid t=1]
-\neq E[Y(1)]$ holds. Thus, an unbiased estimate of the average
-treatment effect cannot be obtained by directly comparing outcomes
-between the the treated and the control groups.
+\newpage
 
-\subsection{Strong Ignorability}
+\section{Topic 1: Ways to Personalized}
+\subsection{Q1: Estimating Treatment Effect}
+\paragraph{Question:} You have explored at least one way to personalize.  That is to try to learn in an RCT which conditions that should be given to which types of students.   Review the methods you are aware (1) Susan Athey’s Random Causal Forest and 2) Counterfactual inference for causal inference/individual treatment effect, , 3) individual treatment rules from the medical literature and 4) Susan Murph's methods) of and how are they different and similar.
+\\ [0.1in]
+
+\paragraph{Strong Ignorability}
 The treatment assignment is defined to be strongly ignorable
 \cite{rosenbaum1983central} if the following two conditions hold: 1).
 $(Y(1), Y(0)) \independent t\mid X$ and 2). $0 < \Pr (t=1 \mid X) <
@@ -43,7 +34,7 @@ condition is also referred to as the "no-hidden confounding variables"
 assumption that all factors determining the outcome of each condition
 are observed.
 
-\section{Random Causal Forests}
+\subsubsection{Random Causal Forests}~\label{sect:rcf}
 \cite{wager2015estimation} proposed random causal forest (RCF) to
 infer treatment effect. From the conceptual point of view, causal trees can be viewed as
 nearest neighbor methods with an adaptive neighborhood metric. Assume
@@ -82,7 +73,7 @@ This condition effectively guarantees that, for large enough $n$,
 there will be enough treatment and control units near any test point
 $x$ for local methods to work.
 
-\subsection{Honest Trees and Forests}
+\paragraph{Honest Trees and Forests}
 The authors also define the Honest Trees and Forests in \cite{wager2015estimation}.
 A tree is honest if, for each training example $i$, it only uses the
 response $Y_i$ to estimate the within-leaf treatment effect $\tau$
@@ -154,7 +145,7 @@ algorithm is shown in Algorithm~\ref{algo:propensity-trees}.
   \caption{Propensity Trees}~\label{algo:propensity-trees}
 \end{algorithm}
 
-\section{Counterfactual Inference}
+\subsubsection{Counterfactual Inference}~\label{sect:bnn}
 The problem of causal inference is often framed in terms of
 counterfactual problems such as "Would this particular student benefit
 more from the video hint or the text hint when the student cannot
@@ -236,7 +227,7 @@ The representation with reduction of the discrepancy between the control and the
 
 After obtaining the representation for subject $\mathbf{x_i}$, CFR
 concatenates the treatment assignment $t_i$ to the representation $\Phi(\mathbf{x}_i)$ and feeds $[\Phi(\mathbf{x}_i), t_i]$ to another two fully connected layers to generate the predicted outcome.
-\section{Individualized Treatment Rules}
+\subsubsection{Individualized Treatment Rules}
 An individual treatment rule (ITR) $d: \mathcal{X} \rightarrow \mathcal{T}$ is a deterministic decision
 rule from subject $\mathbf{x} \in \mathcal{X}$ into the intervention space $\mathcal{T}$. In experiments, we observe a triplet $(\mathbf{x}, t, y)$ from each
 subject, where $\mathbf{x}=(x_1, x_2, \ldots, x_n)^T \in
@@ -339,7 +330,34 @@ the following empirical risk:
 \end{equation}
 where $\left \| f \right \|$ is the norm for $f$, and $\lambda$ is a
 tuning parameter.
-\section{Bayesian Optimization}
+\subsubsection{Comparison}
+All three aforementioned methods (RCF,
+Counterfactual Inference, ITR) can be trained on the data from either RCTs or
+observational studies and can be used to assign a subject to a
+predicted optimal condition. Propensity trees from RCF \cite{wager2015estimation} and BNN from
+counterfactual inference \cite{Johansson2016-dh} are specifically
+optimized for observational studies. Propensity tress uses the idea
+from propensity score matching to reduce possible variance in features
+of subjects between two conditions, while BNN uses deep learning
+approaches for domain adaptation to enforce the similarity between the
+distributions of representations of subjects from two condition.
+
+Since ITR is a deterministic rule aimed to assign a subject to optimal
+condition based on the observed features, ITR does not focus on
+estimating the treatment effect. BNN predicts two potential outcomes
+(the treatment outcome and the control outcome)
+for each subject, so BNN is designed to estimate the individual
+treatment effect. RCF assumes that subjects on the same leaf have the
+same potential outcomes, so RCF usually estimates the treatment effect
+on a small subset of populations from two conditions.
+
+\subsection{Q2: Bayesian Optimization}
+\paragraph{Question:} You have been doing stuff with Bandits. When might
+be learning a function to predict goodness of hints across students be
+a good idea?  Look into Bayesian Optimization.  How is that different
+than what you are planning on doing.  How might you use such methods?
+\\ [0.1in]
+
 Bayesian optimization is a sequential model-based approach for global
 optimization of an unknown objective function $f$. The problem can be
 mathematically expressed as:
@@ -397,7 +415,7 @@ bandit setting can be found in Section~\ref{sect:gp}.
  }
 \end{algorithm}
 
-\subsection{Thompson Sampling}
+\subsubsection{Thompson Sampling}
 Thompson sampling for Beta-Bernoulli bandit perhaps is the simplest non-trivial multi-armed
 bandit strategy in Bayesian optimization \cite{Shahriari2016-ho}. Bernoulli bandit problem is
 the bandit problem when the rewards are either 0 or 1, and for arm $i$
@@ -451,7 +469,7 @@ at least once. It will be an issue if the number of arms becomes
 large. In this case, Bayesian optimization with GP is an alternative
 to the Thompson sampling and alleviate this issue.
 
-\subsection{Choice between function predictor and multi-armed bandit algorithm}
+\subsubsection{Choice between function predictor and multi-armed bandit algorithm}
 In many experiments, the designs space available to the designers have
 components that can be varied independently. For example, in designing
 an advertisement, one has choices such arkwork, font style, and
@@ -478,25 +496,51 @@ function $f:\mathbb{R}^d \rightarrow \mathbb{R}$ from the experiment
 data in order to choose the arm with the highest reward among all
 possible arms.
 
-\section{Online Learning vs. Batch Learning}
-In machine learning, online machine learning is a method of machine
-learning in which data becomes available in a sequential order and is
-used to update our best predictor for future data at each step, as
-opposed to batch learning techniques which generate the best predictor
-by learning on the entire training data set at once.
+\subsection{Q3: Contextual Bandit vs. Causal Inference}
+\paragraph{Question:} In what conditions to use different ways to
+personalize: Bandits (contextual) or Causal inference (Including Susan
+Athey's Random Causal Forest and things like counterfactual inference
+for personalized learning) \\ [0.1 in]
 
-\subsection{Sequential method}
-The sequential approach is independent of the choice of prior and of
-the likelihood function and depends only on the assumption of i.i.d
-data. Sequential methods make use of observations one at a time, or in
-small batches, and then discard them before the next observations are
-used. They can be used, for example, in real-time learning scenarios
-where a steady stream of data is arriving, and predictions must be
-made before all of the data is seen. Because they do not require the
-whole data set to be stored or loaded into memory, sequential methods
-are also useful for large data sets.
+The ultimate goal of contextual bandit algorithms and causal inference
+is the same: find the good intervention for each subject based on the
+observed features. The contextual bandit algorithms are widely used in
+the sequential experiments. In this setting, single interventions from
+a pre-defined set are repeatedly performed to evaluate their goodness
+via observed feedback. But explicit experiments may be difficult to be
+conducted in some research areas. Thus, contextual bandit algorithms
+cannot be directly applied and causal inference models are commonly
+used here. The idea behind causal inference models is to predict the
+outcome of an intervention from the observed data without explicitly
+performing it.
 
-\section{Semi-Supervised Learning}
+\subsection{Q4: Online Learning vs. Batch Learning}
+\paragraph{Question:} Why can BKT not update itself in real-time while
+Thompson sampling can update itself online? \\ [0.1in]
+
+There are four parameters in BKT that are learned from enough training
+data. Before deploying BKT online, we need to collect reliable
+training data and learn these four parameters offline. On the
+contrary, Thompson sampling is non-parametric model, so collecting
+training data is not necessary for it. Thompson sampling is a sequential
+method, which means it makes use of observations one at a time, or in
+small batches. Thus, it can be used in real-time sequential experiments.
+
+Four parameters in BKT are usually learned via
+Expectation-Maximization (EM) algorithm. EM algorithm is an iterative
+method to find the optimal values for parameters. An iterative method
+is a sequence of improving approximate solutions and requires
+computational time and resources. It will take some amount of time to
+update BKT parameters in real-time. On the contrary, Thompson sampling
+has a simple close form to update its posterior distribution after
+receiving new observations.
+
+\subsection{Q5: Semi-Supervised Learning}
+\paragraph{Question:} What is Semi-supervised learning?  How is that
+related to Mitchel's CoLearning? Is the same idea under a different
+name?  Can it be used to help solve your problems related to
+PeerASSIST?  \\ [0.1 in]
+
 In the setting of semi-supervised learning, the training data consists
 of $l$ labeled instances $\left \{ (\mathbf{x}_i, y_i)
 \right \}_{i=1}^{l}$ and $u$ unlabeled instances $\left \{ (\mathbf{x}_j)
@@ -516,7 +560,7 @@ help models achieve a better performance.
     the model have a better performance.}~\label{fg:ssl_model}
 \end{figure}
 
-\subsection{Co-training}
+\subsubsection{Co-training}
 Co-training \cite{blum1998combining} is a technique in semi-supervised learning that requires two
 views of the data. It assumes that each example is described using two
 different feature sets that provide different, complementary
@@ -555,7 +599,7 @@ exists; 2). $x^{(1)}$ or $x^{(2)}$ alone is sufficient to train a good
 classifier; 3). $x^{(1)}$ and $x^{(2)}$ are conditionally independent
 given the class.
 
-\subsection{Application in PeerASSIST}
+\subsubsection{Application in PeerASSIST}
 Semi-supervised learning approaches come in handy in PeerASSIST when
 we try to learn a function to predict the effectiveness of peer
 explanations. In the setting of PeerASSIST, not every peer explanation will be received by students,
@@ -567,8 +611,20 @@ observed data, it becomes difficult to accurately learn the
 function. Semi-supervised learning approaches can be applied in this
 scenario to learn a better function.
 
-\section{Natural Language Processing for Enhancing Learning}
-\subsection{Confusion Detector}
+\section{Topic 2: Application of Deep Learning to EDM and related issues}
+\subsection{Q1: Natural Language Processing for Enhancing Learning}
+\paragraph{Question:} You have done some work in using memory network to
+predict NLP classifications in a Kaggle Data set.   What are some
+applications you can put those skills to that will drive new designs
+that could improve student learning? I think I have heard to throw out
+a few ideas (1) the evaluation of the quality of open response from
+students, or 2) Which kids are improving or slacking? Or 3) Sentiment
+analysis of posts or comments from students.  Is there a reasonable
+way to think about how to use NLP in your PeerASSIST feature? Pitch a
+complete idea of something you think practical  (you don't have to
+want to do it, but if you did that would be nice). \\ [0.1 in]
+
+\subsubsection{Confusion Detector}
 Given the enormous student/instructor ratio in a MOOC's discussion
 forums, it is difficulty for an instructor to read all posts in a
 MOOC's discussion forums. To address this issue, \cite{Agrawal2015-hp}
@@ -583,12 +639,12 @@ students posts and proposed a recommendation algorithm, which takes the
 student confusion as input, to automatically recommended a
 video lecture from a collection of several video lectures related to
 the course.
-\subsection{Automated Essay Scoring}
+\subsubsection{Automated Essay Scoring}
 Automated grading is a critical part of Massive Open Online Courses (MOOCs) system and any intelligent tutoring systems (ITS) at scale. Essay writing is usually a common student assessment process in schools and universities. In this task, students are required to write essays of various length, given a prompt or essay topic. Some standard tests, such as Test of English as a Foreign Language (TOEFL) and Graduate Record Examination (GRE), assess student writing skills. Manually grading these essay will be time-consuming. Thus automated essay scoring (AES) systems has been used in these tests to reduce the time and cost of grading essays. Moreover, as massive open online courses (MOOCs) become widespread and the number of students enrolled in one course increases, the need for grading and providing feedback on written assignments are ever critical.
 
 AES has employed numerous efforts to improving its performance. AES uses statistical and Natural Language Processing (NLP) techniques to automatically predict a score for an essay based on the essay prompt and rubric. Most existing AES systems are built on the basis of predefined features, e.g. number of words, average word length, and number of spelling errors, and a machine learning algorithm \cite{Chen2013-zw}. It is normally a heavy burden to find out effective features for AES. Moreover, the performance of the AES systems is constrained by the effectiveness of the predefined features. Recently another kind of approach has emerged, employing neural network models to learn the features automatically in an end-to-end manner \cite{Taghipour2016-ns}. By this means, a direct prediction of essay scores can be achieved without performing any feature extraction. The model based on long short-term memory (LSTM) networks in \cite{Taghipour2016-ns} has demonstrated promise in accomplishing multiple types of automated grading tasks.
 
-\subsection{NLP in PeerASSIST}
+\subsubsection{NLP in PeerASSIST}
 The goal of PeerASSIST is to crowdsource the explanation (in the
 format of texts) of how to solve a
 given problem from students and apply multi-armed bandit algorithm to
@@ -624,7 +680,16 @@ need some improvement. Then the students have a second chance to
 submitting new explanations. We hope that there will be observable
 improvement on the quality of peer explanations for these students.
 
-\section{Reliable Crowdsourcing}
+\subsection{Q2a: Reliable Crowdsourcing}
+\paragraph{Question:} Besides assessing the learning gains associated
+with each learning artifacts, it can also be useful to characterize
+them for certain features. Suppose you ask many students to rate a
+bunch of learning artifacts along different dimensions, e.g., media
+format, pedagogical approach, difficulty to understand, etc. How do
+you know which learners to trust, and how do you combine their
+opinions into aggregate labels? What kinds of algorithms exist for
+this purpose and how do they work? \\ [0.1 in]
+
 During this process of asking
 students to rate the learning artifacts, we might
 gather noisy rating from students due to the fact that students may
@@ -633,7 +698,7 @@ in some cases may be adversarial. To learn the ground truth of these
 learning artifacts, we need to aggregate their opinions to recover the
 true, unknown label of each learning artifacts.
 
-\subsection{Majority Voting}
+\subsubsection{Majority Voting}
 Given each item is labeled by different workers, it is a
 straightforward approach to take the majority label as the true
 label. From reported experimental results on real crowdcourcing data
@@ -642,7 +707,7 @@ average than individual workers. However, majority voting considers
 each item independently and gives the same weight across all workers
 who label the item when aggregating true label.
 
-\subsection{Dawid-Skene Model}
+\subsubsection{Dawid-Skene Model}
 \cite{dawid1979maximum} were among the first to consider such a
 problem setup. They assume each workers are conditionally independent
 given the true labels and each worker is associated with a
@@ -655,7 +720,7 @@ likelihood method. The optimization can be implemented by the
 expectation-maximization (EM) algorithm.
 
 
-\subsection{GLAD}
+\subsubsection{GLAD}
 \cite{NIPS2009_3644} proposed a richer graphic model which includes
 item difficulty and the expertise of the worker. The difficulty of
 item is modeled by the parameter $1/\beta_j \in [0,\infty)$. Here $1/\beta_j = \infty$
@@ -688,7 +753,7 @@ of the graphical model.
     the model have a better performance.}~\label{fg:glad_model}
 \end{figure}
 
-\subsection{Deep Learning Approach}
+\subsubsection{Deep Learning Approach}
 \cite{Shaham2016-nh} showed that the Dawid and Skene model is
 equivalent to a Restricted Boltzmann Machine (RBM) with a single
 hidden node under the assumption that all workers are conditionally
@@ -739,16 +804,16 @@ on. An illustration of a RBM is depicted in Figure~\ref{fg:rbm-dnn-model}.
   ~\label{fg:rbm-dnn-model}
 \end{figure}
 
-\subsection{Minimax Entropy}
+\subsubsection{Minimax Entropy}
 \cite{Zhou2012-ry} proposed a minimax entropy principle to estimate
 the ground truth given the observed labels by workers. The model is
 illustrated in Figure~\ref{fg:minimax_entropy_model}. Each row
-corresponds to a works indexed by $i$ (from 1 to $m$). Each column
+corresponds to a worker indexed by $i$ (from 1 to $m$). Each column
 corresponds to an item to be labeled, indexed by $j$ (from 1 to
 $n$). Each item has an unobserved label represented as a vector
 $y_{jl}$, which is 1 when item $j$ is in class $l$ (from 1 to $c$),
 and 0 otherwise. Observed data is a tensor of labels $z_{ijk}$, which
-is 1 when the item $i$ is labeled as class $j$ by the worker $i$, and
+is 1 when the item $i$ is labeled as class $k$ by the worker $i$, and
 0 otherwise. We assume that $z_{ij}$ are drawn from
 $\pi_{ij}$. $\pi_{ij}$ can be represented as a tensor $\pi_{ijk}$,
 which is the probability that worker $i$ labels item $j$ as class
@@ -763,8 +828,15 @@ $z_{ij}$.
   ~\label{fg:minimax_entropy_model}
 \end{figure}
 
-The maximum entropy model for $\pi_{ij}$ given $y_{jl}$ is as
-follow:
+$\pi_{ij}$ is modeled through the principle of maximum entropy with the
+constraints from the ideas of majority voting and Dawid and Skene's
+model. Using the principle of maximum entropy to estimate the
+probability distribution provides the largest remaining uncertainty
+(i.e., the maximum entropy) consistent with the constraints. Majority voting indicates that the number of observed votes per
+class per item  $\sum_{i}z_{ijk}$ should match
+$\sum_{i}\pi_{ijk}$. Dawid and Skene's model indicates that the
+observed confusion matrix per worker $\sum_{j}y_{jl}z_{ijk}$ should match $\sum_{j}y_{jl}\pi_{ijk}$. Thus, the maximum entropy model for $\pi_{ij}$ given $y_{jl}$ is as
+follows:
 
 \begin{align}
 \max_{\pi} & -\sum_{i=1}^{m}\sum_{j=1}^{n}\sum_{k=1}^{c} \pi_{ijk}
@@ -777,8 +849,9 @@ follow:
     i,j,k. \label{eq:max_entropy}
 \end{align}
 
-To infer $y_{jl}$, they proposed to choose $y_{jl}$ to minimize the
-entropy in Equation~\ref{eq:max_entropy}.
+To infer $y_{jl}$, the authors proposed to choose $y_{jl}$ to minimize the
+entropy in Equation~\ref{eq:max_entropy}, which leaves $z_{ij}$ the
+least random given $y_{jl}$.
 
 \begin{align}
 \min_{y}\max_{\pi} & -\sum_{i=1}^{m}\sum_{j=1}^{n}\sum_{k=1}^{c} \pi_{ijk}
@@ -792,7 +865,7 @@ entropy in Equation~\ref{eq:max_entropy}.
     j, l. \label{eq:minimax_entropy}
 \end{align}
 
-\subsection{Control Items}
+\subsubsection{Control Items}
 Control items with known answers can be used to evaluation workers'
 reliability and bias, and hence weight their answers accordingly on target
 items with unknown answers. There is a trade-off in this
@@ -809,8 +882,17 @@ their own decisions. Aforementioned methods
 comparing their agreement with other workers and control items can be
 incorporated into these methods.
 
-\section{Gaussian Processes in Bandit Setting}~\label{sect:gp}
-The Gaussian process is the extension of multivariate Gaussian to infinite-sized collections of real-valued variables. In particular, this extension will allow us to think of Gaussian processes as distributions not just over random vectors but in fact distributions over random functions.
+\subsection{Q2b: Gaussian Processes in Contextual
+  Bandit}\label{sect:gp}
+\paragraph{Question:} For the purposes of identifying the most effective
+learning artifact, how do contextual bandits relate to Gaussian
+processes? How are they different/similar? \\ [0.1 in]
+
+The reward function in contextual bandit setting is usually an unknown
+function and expensive to evaluate (performing an arm on a
+subject). In this case, Gaussian process (GP) is an ideal method to model
+our belief on the behavior of the reward function. The reward function
+is modeled as a sample from GP.
 
 The Gaussian process $\mathrm{GP}(\mu_0,k)$ is a non-parametric model
 that is fully characterized by its prior mean function $\mu_0 :
@@ -842,7 +924,7 @@ the next query point given the posterior model. The acquisition
 function should be carefully design to trade off exploration of the
 search area and exploitation of current promising areas.
 
-\subsection{GP-UCB}
+\subsubsection{GP-UCB}
 To decrease uncertainty globally, one strategy could be to pick the
 point which maximums the variance $\mathbf{x}_{n+1}=
 \underset{\mathbf{x} \in
@@ -872,7 +954,7 @@ confidence bound (GP-UCB), introduced by \cite{Srinivas2010-hi}. The
 GP-UCB selection rule is motivated by the UCB algorithm for the
 classical multi-armed bandit problem.
 
-\subsection{Contextual GP-UCB}
+\subsubsection{Contextual GP-UCB}
 Motivated by GP-UCB algorithm mentioned above, \cite{Krause2011-sb}
 extended the generalization of this algorithm by incorporating
 contextual information
@@ -908,7 +990,23 @@ by setting
   \mathbf{x}^{\prime})) = k_Z(\mathbf{z}, \mathbf{z}^{\prime})+k_X(\mathbf{x}, \mathbf{x}^{\prime}).
 \end{equation}
 
-\section{Propensity Score Matching}
+\subsection{Q2c: Selection Bias \& Propensity Score Matching}
+
+\paragraph{Question:} how precisely are estimates of the effectiveness of
+a learning artifact biased when the student herself can choose which
+artifact she receives (selection bias)? How can methods such as
+propensity score matching partially reduce this bias? \\ [0.1 in]
+
+In RCTs, students are randomly assigned to conditions so treatment is assigned by randomization. As a consequence of
+randomization, an unbiased estimate of the ATE can be directly
+computed from the data. An unbiased estimate of the ATE is
+$E[Y_i(1)-Y_i(0)]=E[Y(1)] - E[Y(0)]$. When the student can choose
+which artifact she receives, randomization of treatment assignment
+does not exist. As a consequence, the treated students often differ
+systematically from untreated students. In general, $E[Y(1)\mid t=1]
+\neq E[Y(1)]$ holds. Thus, an unbiased estimate of the ATE cannot be
+obtained by directly comparing outcomes between the the treated and the control groups.
+
 A propensity score \cite{rosenbaum1983central} is the probability of a unit (e.g., student,
 classroom, school) being assigned to a particular treatment given a
 set of observed features. Propensity scores are used to reduce
@@ -918,8 +1016,6 @@ Suppose that we have a binary treatment $T=\{0,1\}$, an outcome $Y$, and
 observed features $X$. The propensity score is defined as the
 conditional probability of treatment given background variables:
 $$p(x):= \Pr(T=1 \mid X=x)$$
-Let $Y(0)$ and $Y(1)$ denote the potential outcomes under the control
-and the treatment, respectively.
 
 Due to random treatment assignment in RCT, the propensity score is
 known. However, the actual propensity score in observational experiments is
@@ -936,44 +1032,75 @@ propensity score.
 The purpose of Propensity score matching (PSM) \cite{austin2011introduction} is to form matched sets
 of the treated and
 the control subjects who share a similar value of the predicted propensity
-score. PSM allows one to estimate the average treatment effect for the
-treated (ATT) \cite{imbens2004nonparametric}. The ATT is the average effect of treatment on those
-subjects who ultimately receive the treatment. The most common
+score. The most common
 implementation of PSM is one-to-one or pair matching, in which pairs
 of the control and the treated subjects are formed, such that matched
 subjects have similar values of the propensity score. Once a matched
 sample has been formed, the treatment effect can be estimated by
 directly comparing outcomes between treated and untreated subjects in
-the matched sample. In summary, the analysis of a propensity score matched sample can mimic that of an
+the matched sample. PSM attempts to mimic randomization by creating a
+sample of units that received the treatment that is comparable on all
+observed covariates to a sample of units that did not receive the
+treatment. In summary, the analysis of a propensity score matched sample can mimic that of an
 RCT: one can directly compare outcomes between the treated and the control
 subjects within the propensity score matched sample. 
 
-The possibility of bias arises because the apparent difference in outcome between these two groups of units may depend on characteristics that affected whether or not a unit received a given treatment instead of due to the effect of the treatment per se. In randomized experiments, the randomization enables unbiased estimation of treatment effects; for each covariate, randomization implies that treatment-groups will be balanced on average, by the law of large numbers. Unfortunately, for observational studies, the assignment of treatments to research subjects is typically not random. Matching attempts to mimic randomization by creating a sample of units that received the treatment that is comparable on all observed covariates to a sample of units that did not receive the treatment.
+The aforementioned methods, propensity trees
+\cite{wager2015estimation} in section~\ref{sect:rcf} and balancing
+neural networks (BNN) \cite{Johansson2016-dh} in
+section~\ref{sect:bnn}, can also be used to reduce the selection
+bias. The propensity trees is inspired by the idea of propensity score
+matching. The goal of propensity trees is to train a classification
+tree to predict the treatment assignments. The subjects on the same
+leaf are considered as matched subjects. Due to the selection bias,
+two distributions of observed covariates for the control and the
+treated groups may be different. Thus, the problem of counterfactual
+inference may require inference over a different distribution than the
+one from which samples are given. In other words, the features
+distribution of the test data differs from that of the training
+data. This is a special case of domain adaptation. BNN uses deep learning
+approaches for domain adaptation to learn a balanced representation
+between the control and the treatment groups to reduce the selection
+bias.
 
-\section{Peer Review}
-After going through Chris Schunn's publications, I find these three papers
-\cite{patchan2016understanding,kaufman2011students,patchan2015understanding}
+\section{Topic 3: Crowdsourcing for Education.  More on the HCI side and HCOMP ideas}
+\subsection{Q1: Peer Assessment}
+\paragraph{Question:} Chris Schunn works on peer grading.  What
+literature in that is relevant to your dissertation?  Do people make
+good reviewers? Do they learn from reviewing?  Do authors benefit from
+getting reviews?  (Do they essay they right get better if they get a
+review?) \\ [0.1 in]
+
+After going through Chris Schunn's publications, I find these papers
+\cite{patchan2016understanding,patchan2015understanding,
+schunn2016reliability, cho2006validity}
 related to my dissertation. The summary of research findings from
 these paper is listed below.
 
-\cite{patchan2016understanding} pointed out that research on such peer assessments has found that, in general, peers
-are capable of providing valid ratings, and their feedback is usually
-just as effective as an instructor's feedback in help students improve
-their draft and sometimes more effective. Further, participating in
-peer assessment improves writing ability.
+In \cite{cho2006validity, schunn2016reliability}, the authors run a
+set of studies to investigate the reliability and validity of peer
+assessment of writing on college level and high school level,
+respectively. The authors use term reliability to refer to the extent
+to which students' assessment of writing correlate with each other and
+use validity to describe the extent to which students can accurately
+judge the quality of the writing. These two papers reach the
+conclusion that the assessments from students at college level and
+high school level have strong reliability and validity. In other
+words, peers in general are capable of providing valid ratings for
+others' writing, and their feedback is usually thought to be helpful
+by other students. Students improved their writing ability from peer
+assessment, and specifically from providing feedback to peers.
 
-\cite{kaufman2011students} found that students
-sometimes regard peer assessment as unfair and often believe that peers are
-unqualified to review and assess students’ work. Furthermore, students’ perceptions about
-the fairness of peer assessment drop significantly following students’ experience in doing
-peer assessment. Students’ fairness perceptions—and drops in those perceptions—are most
-significantly associated with their perceptions about the extent to which peers’ feedback is
-useful and positive. However, students’ perceptions appear to be unrelated to the extent of
-their revision work.
+\cite{patchan2016understanding} investigated the relationship between
+writer ability and reviewer ability and found several interesting interactions
+between these two factors. Often lower-ability writers were more
+willing to improve their writing using feedback from other low-ability
+reviewers than from high-ability reviewers, while higher-ability
+writers benefited equally from receiving feedback from lower-ability
+and higher-ability reviewers, which is inconsistent with student
+beliefs that only feedback from high-ability peers is worthwhile.
 
-\cite{patchan2015understanding} found that reviewer ability and text quality did not affect the amount of
-feedback provided (i.e., number of comments and length of
-comments). Low reviewer provided more praise than high reviewers
+In terms of the style of the feedback, \cite{patchan2015understanding} found that low reviewer provided more praise than high reviewers
 whereas high reviewers provided more criticism than low
 reviewers. This criticism described more problems and offered more
 solutions. There was one interesting interaction between reviewer
@@ -981,13 +1108,53 @@ ability and text quality -- high reviewers described more problems in
 the low-quality texts than in the high-quality texts, whereas low
 reviewers did not make this distinction.
 
-\cite{patchan2016understanding} found several interesting interactions
-between two factors. Often lower-ability writers benefited more from
-receiving feedback from lower-ability reviewers, while higher-ability
-writers benefited equally from receiving feedback from lower-ability
-and higher-ability reviewers.
+\subsection{Q2: DALITE}
+\paragraph{Question:} How would that be adapted to deal with DALITE
+objects? \\ [0.1 in]
 
-\section{Learnersourcing Subgoal Labels}
+Distributed Active Learning Technology Integrated Environment
+(DALITE) \cite{bhatnagar2015analysis} is a web-based application for an asynchronous peer
+instruction. In DALITE, students are asked to submit their
+explanations for their choice after answering a multiple-choice
+question. Then they are prompted with several explanations from other
+students. Half of these peer explanations are for the choice that
+students select, and the other half of the peer explanations are for a
+different choice. Students have a chance to reflect their thinking by
+comparing their explanations with prompted explanations and make a
+second choice. Students can also select the best explanation among
+those displayed.
+
+Similarly to \cite{cho2006validity, schunn2016reliability}, we should
+first investigate in DALITE whether students can learn from providing their own explanations and from reflecting their thinking by
+comparing their explanations with other students'
+explanations. Another investigation should be focused on the quality
+of peer explanations and students' perceptions about the asynchronous
+peer instruction workflow.
+
+\cite{patchan2016understanding} found that lower-ability writers were more
+willing to improve their writing using feedback from other low-ability
+reviewers than from high-ability reviewers, while higher-ability
+writers benefited equally from receiving feedback from lower-ability
+and higher-ability reviewers. This inspires us to investigate whether
+this conclusion holds in the context of DALITE. We usually believe
+that high-ability students produce high-quality explanations and both
+high-ability and low-ability students benefit from these
+explanations. If the aforementioned conclusion holds in DALITE, an
+adaptive strategy can be applied to select the prompted explanations
+for students based on their ability. In other words, for low-ability students,
+explanations from other low-ability students should be selected.
+
+Another interesting topic inspired by \cite{patchan2015understanding}
+is the style of peer explanations. There are two factors of the
+students which play an important role in this
+setting: the ability of solving a question and the ability of providing
+a high-quality explanations. We can look at the interactions between
+the style and these two factors.
+
+\subsection{Q3: Learnersourcing Subgoal Labels}
+\paragraph{Question:} How is the work by Rob Miller and Juho about
+learning subgoal related to PeerASSIST? \\ [0.1 in]
+
 \cite{Weir2015-hg} presented a three-stage workflow for learners to generate
 subgoal labels for how-to video while they are learning from the
 videos. The goal of the first stage (Generation) is to let learners submit the
@@ -1000,7 +1167,7 @@ for quality and eventually agree on a final label for that
 subgoal. During stage 2 and stage 3, learners always have a option to
 refine the label.
 
-In PeerAssist, only students who receive 0 on a problem are
+In PeerASSIST, only students who receive 0 on a problem are
 prompted with a peer explanation from one of students who answer the same
 problem correctly. Then these students have a option to give a rating
 (thumb up or thumb down) to the peer explanation that they
@@ -1039,52 +1206,58 @@ explanation is highly effective. The goal of this stage is to let
 students to evaluate the optimal explanation for quality and analog to
 the goal of exploration strategy in multi-armed bandit algorithm.
 
-\section{HCOMP \& CSCW}
-\cite{Glassman2016-yy}
-Personalized support for students is a gold standard in education,
-but it scales poorly with the number of students. Prior
-work on learnersourcing presented an approach for learners
-to engage in human computation tasks while trying to learn
-a new skill. Our key insight is that students, through their
-own experience struggling with a particular problem, can
-become experts on the particular optimizations they implement
-or bugs they resolve. These students can then generate
-hints for fellow students based on their new expertise. We
-present workflows that harvest and organize students’ collective
-knowledge and advice for helping fellow novices through
-design problems in engineering. Systems embodying each
-workflow were evaluated in the context of a college-level
-computer architecture class with an enrollment of more than
-two hundred students each semester. We show that, given
-our design choices, students can create helpful hints for their
+\subsection{Q4: HCOMP \& CSCW}
+\paragraph{Question:} Look at the two most recent  HCOMP conference and
+the CSCL conferences.   What do you see in those conferences that
+relate to what you want to propose for your dissertation?   I assume
+some will be methodological, while others will be on the design side.
+For the purpose of this question let's look at the design side. \\
+[0.1 in]
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.75\columnwidth]{learnersourcing.png}
+  \caption{Reprinted from \cite{Glassman2016-yy}. In the
+    self-reflection workflow, students generate hints by reflecting on
+  an obstacle they themselves have recently overcome. In the
+  comparison workflow, students compare their own solutions to those
+  of other students, generating a hint as a byproduct of explaining
+  how one might get from one solution to the other.}
+  ~\label{fg:learnersourcing-model}
+\end{figure}
+
+The aforementioned paper, Learnersoucring Subgoal Labels for How-to Videos
+\cite{Weir2015-hg}, is published in CSCW 2015. In this paper, the
+authors showed that students were qualified to generate subgoal labels
+for how-to videos based on their new expertise. Motivated by this prior
+work, another paper, Learnersourcing Personalized Hints
+\cite{Glassman2016-yy}, is published in CSCW 2016. In
+\cite{Glassman2016-yy}, the authors designed two workflows aimed to
+engage students in creating personalized hints. Results showed that students can create helpful hints for their
 peers that augment or even replace teachers’ personalized assistance,
 when that assistance is not available.
 
-\cite{Yim2017-zt}
-Group activities that use Google Docs for simultaneous
-collaborative writing and editing are increasingly common
-in higher education. Although studies show that
-synchronous collaboration can bring multiple benefits, such
-as enhanced productivity and writing quality, little is known
-about these writing practices in classrooms and their impact
-on students’ writing. Using a mixed method approach, we
-conducted an empirical study that explores the different
-styles of synchronous collaboration in 45 Google Docs
-documents produced by 82 undergraduate students, and how
-students’ practices affect the specific dimensions of the final
-text including quality. The results suggest that (a) out of
-four styles, Divide and Conquer style tended to produce
-better quality text whereas Main Writer had the lowest
-quality scores, and that (b) balanced participation and
-amount of peer editing led to longer texts with higher
-quality scores for content, evidence, but not organization or
-mechanics. Given these results, we suggest several design
-features for collaborative writing systems and propose
-guidelines for instructional practices.
+In the self-reflection workflow, students iteratively work on their
+solutions to pass as many teacher-created tests as possible. There are
+hints available for any verification. Students can ask for these hints
+to help them pass the test case. After fixing a bug in their own
+solution, students can generate a new hint for others struggling with
+the same error.
 
-\cite{Yoon2016-nk}
-New multi-modal annotation tools hold the promise of bringing the benefits of face-to-face contact to remote, asynchronous interactions. One such system, RichReview++, incorporates new techniques to improve access to the embedded multimedia commentary and allows users to annotate with new modalities, like deictic gestures. We conducted a series of field deployments of RichReview++ to characterize how these features benefit students using them for activities in the university classroom. Our first deployment investigated the use of multi-modal annotations as a way for instructors to provide feedback on student term papers. Our second deployment used annotations to support peer discussion about assigned readings in a graduate-level course. We found that presenting voice comments as interactive waveforms seems to facilitate students' consumption of the instructor's voice comments. We also found that gestural annotations clarify voice and give annotators a quick and lightweight way to alter the scope of their voice comments. Based on these results, we suggest ways to best leverage multi-modal annotation tools in education environments.
+In the comparison workflow, students compare their solution to
+alternative solution submitted by other students or teachers. If their
+solution performs better than a solution $W$, they are asked to submit
+an optimization hint for students who have solutions like $W$. If
+their solution performs worse than a solution $B$, they are prompted
+to generate an optimization hint for students who have solutions like
+their own. Figure~\ref{fg:learnersourcing-model} illustrates both workflows.
 
+\cite{Yoon2016-nk} developed a new multi-modal annotation (e.g.,
+gesture and waveform) tool, called
+$\mathrm{RichReview}^{++}$. The aim of this tool is to texts, audios
+and gestures to mimic face-to-face communication experience for
+collaborators reviewing and providing feedback on documents. It is
+also extended to support peer discussion.
 \bibliographystyle{apalike}
 \bibliography{references}
 \end{document}
