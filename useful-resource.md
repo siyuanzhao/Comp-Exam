@@ -64,3 +64,5 @@
 [Visualization for Bayesian Optimization](https://github.com/fmfn/BayesianOptimization/blob/master/examples/visualization.ipynb)
 > Show the changes in the posterior distribution after iterations.
 
+[Covariate Shift](http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html)
+> Good introduction to covariate shift and give an intuitive explanations on why covariate shift makes the performance suffer.
