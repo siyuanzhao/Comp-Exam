@@ -66,3 +66,6 @@
 
 [Covariate Shift](http://sifaka.cs.uiuc.edu/jiang4/domain_adaptation/survey/node8.html)
 > Good introduction to covariate shift and give an intuitive explanations on why covariate shift makes the performance suffer.
+
+[Information Geometry](http://math.ucr.edu/home/baez/information/information_geometry_6.html)
+> Give a good interpretation of Radon-Nikodym derivative
