@@ -69,3 +69,8 @@
 
 [Information Geometry](http://math.ucr.edu/home/baez/information/information_geometry_6.html)
 > Give a good interpretation of Radon-Nikodym derivative
+
+[Kernel Cookbook](http://www.cs.toronto.edu/~duvenaud/cookbook/index.html)
+> An execellent tutorial on kernel functions.
+
+
